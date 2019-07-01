@@ -1,0 +1,39 @@
+
+/*
+ * Grbl_program_analisys.txt
+ *
+ * Created: 30-6-2019 12:28:28
+ *  Author: hfjbu
+ */ 
+
+system.h
+In this file all (global) masks and structures are defined
+
+Limits.c  ISR(LIMIT_INT_vect)
+This routine handles the hardware limit triggers. It calls limits_get_state() to check if a limit switch is hit. limits_get_state() has to be modified to disable hardware limits on Y-asix
+
+Limits.c limits_get_state()
+This routine checks for limit switch triggers. It is also used for homing.
+To disable hardware limit on Y-axis, the Y-axis state has be to filtered out except when homing. During homing the sys.state is set to STATE_HOMING and this can be used to decide to filter out the y-axis limit switch
+The index of the Y-axis it set in Y_AXIS. To disable the check test on STATE_HOMING and if not, clear the Y_AXIS bit in pin change state!
+
+report.c report_realtime_status()
+This routine reports the current grbl state.
+
+The Probe pin is connected to Pin A15 on the arduino Mega. Its pin change interrupt is handled by PCI2, that handles all pin change interrupts on Pin A8..A15, like safetydoor and cycle start. 
+system.c ISR(CONTROL_INT_vect) must handle the synchronisation pulses interrupts.
+
+main.c
+This is the initialization routine that finally calls the endless loop protocol_main_loop();
+
+protocol.c protocol_main_loop()
+This is the mainloop that is called at the start of the program. After some initialisation, checks prints a welcome message and starts reading and processing the serial input and calling protocol_exec_rt_system().
+
+protocol.c protocol_exec_rt_system()
+This is the code where motion and report code is executed. There are two version, one is called when GRBL is suspended! In this code the reporting of the threading state has to be implemented
+
+Report of the threading state:
+The threading state is reported when bit EXEC_SPINDLE_INDEX is set in the sys_sync_state at every spindle index pulse.
+
+Synchronize of the threading Z-speed
+The threading Z-speed is synchronized when bit EXEC_SPINDLE_SYNC is set in the sys_sync_state at every spindle index pulse.

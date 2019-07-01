@@ -37,6 +37,9 @@
 #define EXEC_MOTION_CANCEL  bit(6) // bitmask 01000000
 #define EXEC_SLEEP          bit(7) // bitmask 10000000
 
+#define EXEC_SPINDLE_INDEX  bit(0) // bitmask 00000001
+#define EXEC_SPINDLE_SYNC   bit(1) // bitmask 00000010
+
 // Alarm executor codes. Valid values (1-255). Zero is reserved.
 #define EXEC_ALARM_HARD_LIMIT           1
 #define EXEC_ALARM_SOFT_LIMIT           2
@@ -106,6 +109,7 @@
 #define CONTROL_PIN_INDEX_RESET         bit(1)
 #define CONTROL_PIN_INDEX_FEED_HOLD     bit(2)
 #define CONTROL_PIN_INDEX_CYCLE_START   bit(3)
+#define CONTROL_PIN_INDEX_SPINDLE_SYNC	bit(4)
 
 // Define spindle stop override control states.
 #define SPINDLE_STOP_OVR_DISABLED       0  // Must be zero.
@@ -134,6 +138,7 @@ typedef struct {
   uint8_t spindle_stop_ovr;    // Tracks spindle stop override states
   uint8_t report_ovr_counter;  // Tracks when to add override data to status reports.
   uint8_t report_wco_counter;  // Tracks when to add work coordinate offset data to status reports.
+  uint8_t report_synchronization_counter;  // Tracks when to report the synchronization state.
   #ifdef ENABLE_PARKING_OVERRIDE_CONTROL
     uint8_t override_ctrl;     // Tracks override control states.
   #endif
@@ -145,9 +150,13 @@ extern system_t sys;
 extern int32_t sys_position[N_AXIS];      // Real-time machine (aka home) position vector in steps.
 extern int32_t sys_probe_position[N_AXIS]; // Last probe position in machine coordinates and steps.
 
-extern volatile uint8_t sys_probe_state;   // Probing state value.  Used to coordinate the probing cycle with stepper ISR.
-extern volatile uint8_t sys_rt_exec_state;   // Global realtime executor bitflag variable for state management. See EXEC bitmasks.
-extern volatile uint8_t sys_rt_exec_alarm;   // Global realtime executor bitflag variable for setting various alarms.
+extern volatile uint8_t sys_sync_state;				// Global realtime executor bitflag variable for spindle synchronisation.
+extern volatile uint8_t sys_index_pulse_count;		// Global index pulse counter
+extern volatile int32_t sys_synchronization_count;	// Global synchronization pulse counter
+
+extern volatile uint8_t sys_probe_state;		// Probing state value.  Used to coordinate the probing cycle with stepper ISR.
+extern volatile uint8_t sys_rt_exec_state;		// Global realtime executor bitflag variable for state management. See EXEC bitmasks.
+extern volatile uint8_t sys_rt_exec_alarm;		// Global realtime executor bitflag variable for setting various alarms.
 extern volatile uint8_t sys_rt_exec_motion_override; // Global realtime executor bitflag variable for motion-based overrides.
 extern volatile uint8_t sys_rt_exec_accessory_override; // Global realtime executor bitflag variable for spindle/coolant overrides.
 

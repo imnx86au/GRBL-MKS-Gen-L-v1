@@ -1,0 +1,25 @@
+
+/*
+ * Program_Changes.txt
+ *
+ * Created: 30-6-2019 13:45:44
+ *  Author: hfjbu
+ */ 
+
+2019-06-29
+Config.h
+//Define for use on a lathe, enabled by default because this is a GRBL lathe version
+#define LATHE
+//Define folowing lines to enable code for testing this lathe version
+#define LATHETEST1	
+
+2019-06-30
+Limits.c  limits_get_state()  Changed to ignore hardware limit triggers on the Y-axis (Spindle Index pulse) when not Homing
+#ifdef LATHE
+	if (sys.state!=STATE_HOMING)
+	  limit_state &= ~(1<<Y_AXIS);
+#endif
+
+2019-06-30
+system.h + main.c added volatile var sys_synchronization_count for registering the synchronization pulses
+report.h + report.c report_synchronization_state(); for reporting the synchronization state

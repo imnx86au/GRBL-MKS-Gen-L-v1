@@ -144,7 +144,7 @@ uint8_t limits_get_state()
       if (pin)
         limit_state |= (1 << idx);
     } 
-    return(limit_state);
+    //return(limit_state);
   #else
     uint8_t pin = (LIMIT_PIN & LIMIT_MASK);
     #ifdef INVERT_LIMIT_PIN_MASK
@@ -157,8 +157,14 @@ uint8_t limits_get_state()
         if (pin & get_limit_pin_mask(idx)) { limit_state |= (1 << idx); }
       }
     }
-    return(limit_state);
+    //return(limit_state);
   #endif //DEFAULTS_RAMPS_BOARD
+//Ignore Hardware Limit triggers on the Y-Axis (Spindle Index Pulse) when LATHE is defined and not Homing
+  #ifdef LATHE
+	if (sys.state!=STATE_HOMING)
+	  limit_state &= ~(1<<Y_AXIS);
+  #endif
+  return(limit_state);
 }
 
 #ifdef DEFAULTS_RAMPS_BOARD

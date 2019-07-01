@@ -1,0 +1,13 @@
+
+/*
+ * Threading_example.txt
+ *
+ * Created: 30-6-2019 19:23:56
+ *  Author: hfjbu
+ */ 
+
+ G95 = feed per revolution mode. When G95 is active Feedrate is set as mm/revolution
+
+ this GCode will do a 1.5 mm pitch thread 10 threads long.
+ G95				enter the Feed per Revolution mode
+ G01 F1.5 Z-15		Move to Z position -15, advance Z 1.5 mm for every revolution

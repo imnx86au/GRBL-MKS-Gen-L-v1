@@ -49,6 +49,7 @@ uint8_t system_control_get_state()
     if (bit_isfalse(pin,(1<<CONTROL_RESET_BIT))) { control_state |= CONTROL_PIN_INDEX_RESET; }
     if (bit_isfalse(pin,(1<<CONTROL_FEED_HOLD_BIT))) { control_state |= CONTROL_PIN_INDEX_FEED_HOLD; }
     if (bit_isfalse(pin,(1<<CONTROL_CYCLE_START_BIT))) { control_state |= CONTROL_PIN_INDEX_CYCLE_START; }
+    if (bit_isfalse(pin,(1<<CONTROL_SPINDLE_SYNC_BIT))) { control_state |= CONTROL_PIN_INDEX_SPINDLE_SYNC; }
   }
   return(control_state);
 }
@@ -70,7 +71,8 @@ ISR(CONTROL_INT_vect)
       bit_true(sys_rt_exec_state, EXEC_FEED_HOLD); 
     } else if (bit_istrue(pin,CONTROL_PIN_INDEX_SAFETY_DOOR)) {
       bit_true(sys_rt_exec_state, EXEC_SAFETY_DOOR);
-    } 
+	} else if (bit_istrue(pin,CONTROL_PIN_INDEX_SPINDLE_SYNC)) {
+	 sys_synchronization_count++; bit_true(sys_sync_state, EXEC_SPINDLE_SYNC);   } 
   }
 }
 

@@ -85,7 +85,7 @@
   #define COOLANT_MIST_PORT   PORTH
   #define COOLANT_MIST_BIT    6 // MEGA2560 Digital Pin 9
 
-  // Define user-control CONTROLs (cycle start, reset, feed hold) input pins.
+  // Define user-control CONTROLs (cycle start, reset, feed hold) input pins. and the spindle synchronization pin
   // NOTE: All CONTROLs pins must be on the same port and not on a port with other input pins (limits).
   #define CONTROL_DDR       DDRK
   #define CONTROL_PIN       PINK
@@ -94,18 +94,23 @@
   #define CONTROL_FEED_HOLD_BIT     1  // MEGA2560 Analog Pin 9
   #define CONTROL_CYCLE_START_BIT   2  // MEGA2560 Analog Pin 10
   #define CONTROL_SAFETY_DOOR_BIT   3  // MEGA2560 Analog Pin 11
+  #define CONTROL_SPINDLE_SYNC_BIT  7  // MEGA2560 Analog Pin 15, same as probe pin
   #define CONTROL_INT       PCIE2  // Pin change interrupt enable pin
   #define CONTROL_INT_vect  PCINT2_vect
   #define CONTROL_PCMSK     PCMSK2 // Pin change interrupt register
-  #define CONTROL_MASK      ((1<<CONTROL_RESET_BIT)|(1<<CONTROL_FEED_HOLD_BIT)|(1<<CONTROL_CYCLE_START_BIT)|(1<<CONTROL_SAFETY_DOOR_BIT))
-
-  // Define probe switch input pin.
+  #ifdef LATHE
+	#define CONTROL_MASK      ((1<<CONTROL_RESET_BIT)|(1<<CONTROL_FEED_HOLD_BIT)|(1<<CONTROL_CYCLE_START_BIT)|(1<<CONTROL_SAFETY_DOOR_BIT)|(1<<CONTROL_SPINDLE_SYNC_BIT))
+  #else
+    #define CONTROL_MASK      ((1<<CONTROL_RESET_BIT)|(1<<CONTROL_FEED_HOLD_BIT)|(1<<CONTROL_CYCLE_START_BIT)|(1<<CONTROL_SAFETY_DOOR_BIT))
+  #endif
+  
+  // Define probe switch input pin.   is the same as the spindle synchronization pin
   #define PROBE_DDR       DDRK
   #define PROBE_PIN       PINK
   #define PROBE_PORT      PORTK
   #define PROBE_BIT       7  // MEGA2560 Analog Pin 15
   #define PROBE_MASK      (1<<PROBE_BIT)
-
+ 
   // Advanced Configuration Below You should not need to touch these variables
   // Set Timer up to use TIMER4B which is attached to Digital Pin 7
   #define SPINDLE_PWM_MAX_VALUE     1024.0 // Translates to about 1.9 kHz PWM frequency at 1/8 prescaler
@@ -244,11 +249,16 @@
   #define CONTROL_FEED_HOLD_BIT     2  // Pin A10 - RAMPS Aux 2 Port
   #define CONTROL_CYCLE_START_BIT   3  // Pin A11 - RAMPS Aux 2 Port
   #define CONTROL_SAFETY_DOOR_BIT   4  // Pin A12 - RAMPS Aux 2 Port
+  #define CONTROL_SPINDLE_SYNC_BIT  7  // MEGA2560 Analog Pin 15, same as probe pin
   #define CONTROL_INT       PCIE2  // Pin change interrupt enable pin
   #define CONTROL_INT_vect  PCINT2_vect
   #define CONTROL_PCMSK     PCMSK2 // Pin change interrupt register
-  #define CONTROL_MASK      ((1<<CONTROL_RESET_BIT)|(1<<CONTROL_FEED_HOLD_BIT)|(1<<CONTROL_CYCLE_START_BIT)|(1<<CONTROL_SAFETY_DOOR_BIT))
-
+  #ifdef LATHE
+	#define CONTROL_MASK      ((1<<CONTROL_RESET_BIT)|(1<<CONTROL_FEED_HOLD_BIT)|(1<<CONTROL_CYCLE_START_BIT)|(1<<CONTROL_SAFETY_DOOR_BIT)|(1<<CONTROL_SPINDLE_SYNC_BIT))
+  #else
+	#define CONTROL_MASK      ((1<<CONTROL_RESET_BIT)|(1<<CONTROL_FEED_HOLD_BIT)|(1<<CONTROL_CYCLE_START_BIT)|(1<<CONTROL_SAFETY_DOOR_BIT))
+  #endif
+  
   // Define probe switch input pin.
   #define PROBE_DDR       DDRK
   #define PROBE_PIN       PINK

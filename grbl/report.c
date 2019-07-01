@@ -130,6 +130,13 @@ void report_alarm_message(uint8_t alarm_code)
   delay_ms(500); // Force delay to ensure message clears serial write buffer.
 }
 
+// Prints synchronization state.
+void report_synchronization_state()
+{
+	printPgmString(PSTR("G95:"));
+	print_uint32_base10(sys_synchronization_count);
+	report_util_line_feed();
+}
 // Prints feedback messages. This serves as a centralized method to provide additional
 // user feedback for things that are not of the status/alarm message protocol. These are
 // messages such as setup warnings, switch toggling, and how to exit alarms.
@@ -593,6 +600,11 @@ void report_realtime_status()
         if (cl_state & COOLANT_STATE_MIST) { serial_write('M'); }
       }  
     }
+  #endif
+  
+  #ifdef LATHE
+      printPgmString(PSTR("|Sync:"));
+      print_uint32_base10(sys_synchronization_count);
   #endif
 
   serial_write('>');

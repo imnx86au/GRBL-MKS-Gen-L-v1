@@ -4,6 +4,7 @@
 
   Copyright (c) 2012-2016 Sungeun K. Jeon for Gnea Research LLC
   Copyright (c) 2009-2011 Simen Svale Skogsrud
+  modified for use on a lathe, 2019 Huub Buis
 
   Grbl is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -29,6 +30,10 @@
 #define config_h
 #include "grbl.h" // For Arduino IDE compatibility.
 
+//Define for use on a lathe, enabled by default because this is a GRBL lathe version
+#define LATHE
+//Define folowing lines to enable code for testing this lathe version
+#define LATHETEST1		
 
 // Define CPU pin map and default settings.
 // NOTE: OEMs can avoid the need to maintain/update the defaults.h and cpu_map.h files and use only
@@ -89,7 +94,9 @@
 // If homing is enabled, homing init lock sets Grbl into an alarm state upon power up. This forces
 // the user to perform the homing cycle (or override the locks) before doing anything else. This is
 // mainly a safety feature to remind the user to home, since position is unknown to Grbl.
-#define HOMING_INIT_LOCK // Comment to disable
+#ifndef LATHETEST1
+	#define HOMING_INIT_LOCK // Comment to disable
+#endif
 
 // Define the homing cycle patterns with bitmasks. The homing cycle first performs a search mode
 // to quickly engage the limit switches, followed by a slower locate mode, and finished by a short
@@ -107,12 +114,22 @@
 // will not be affected by pin sharing.
 // NOTE: Defaults are set for a traditional 3-axis CNC machine. Z-axis first to clear, followed by X & Y.
 #ifdef DEFAULTS_RAMPS_BOARD
-  #define HOMING_CYCLE_0 (1<<X_AXIS)   // Home X axis
-  #define HOMING_CYCLE_1 (1<<Y_AXIS)   // Home Y axis
-  #define HOMING_CYCLE_2 (1<<Z_AXIS)   // OPTIONAL: Home Z axis 
-#else
-  #define HOMING_CYCLE_0 (1<<X_AXIS)  // REQUIRED: First move X (Lathe)
-  #define HOMING_CYCLE_1 (1<<Z_AXIS)  // OPTIONAL: Then move Z (Lathe)
+	#ifdef LATHE
+		#define HOMING_CYCLE_0 (1<<X_AXIS)  // REQUIRED: First move X (Lathe)
+		#define HOMING_CYCLE_1 (1<<Z_AXIS)  // OPTIONAL: Then move Z (Lathe)
+	#else
+		#define HOMING_CYCLE_0 (1<<X_AXIS)   // Home X axis
+		#define HOMING_CYCLE_1 (1<<Y_AXIS)   // Home Y axis
+		#define HOMING_CYCLE_2 (1<<Z_AXIS)   // OPTIONAL: Home Z axis 
+	#endif
+  #else
+	#ifdef LATHE
+		#define HOMING_CYCLE_0 (1<<X_AXIS)  // REQUIRED: First move X (Lathe)
+		#define HOMING_CYCLE_1 (1<<Z_AXIS)  // OPTIONAL: Then move Z (Lathe)
+	#else
+		#define HOMING_CYCLE_0 (1<<X_AXIS)  // REQUIRED: First move X
+		#define HOMING_CYCLE_1 (1<<Y_AXIS)  // OPTIONAL: Then move Y
+	#endif
   // #define HOMING_CYCLE_2                         // OPTIONAL: Uncomment and add axes mask to enable
 #endif // DEFAULTS_RAMPS_BOARD
 
@@ -131,7 +148,9 @@
 // cycle is still invoked by the $H command. This is disabled by default. It's here only to address
 // users that need to switch between a two-axis and three-axis machine. This is actually very rare.
 // If you have a two-axis machine, DON'T USE THIS. Instead, just alter the homing cycle for two-axes.
-#define HOMING_SINGLE_AXIS_COMMANDS // Default disabled. Uncomment to enable.
+#ifdef LATHE
+	#define HOMING_SINGLE_AXIS_COMMANDS // Define Lathe to enable.
+#endif
 
 // After homing, Grbl will set by default the entire machine space into negative space, as is typical
 // for professional CNC machines, regardless of where the limit switches are located. Uncomment this
@@ -167,7 +186,9 @@
 // Upon a successful probe cycle, this option provides immediately feedback of the probe coordinates
 // through an automatically generated message. If disabled, users can still access the last probe
 // coordinates through Grbl '$#' print parameters.
-#define MESSAGE_PROBE_COORDINATES // Enabled by default. Comment to disable.
+#ifndef LATHE
+	#define MESSAGE_PROBE_COORDINATES // disabled by default. Comment to disable when LATHE is defined.
+#endif
 
 // This option causes the feed hold input to act as a safety door switch. A safety door, when triggered,
 // immediately forces a feed hold and then safely de-energizes the machine. Resuming is blocked until
@@ -290,6 +311,7 @@
 #define REPORT_OVR_REFRESH_IDLE_COUNT 10  // (1-255) Must be less than or equal to the busy count
 #define REPORT_WCO_REFRESH_BUSY_COUNT 30  // (2-255)
 #define REPORT_WCO_REFRESH_IDLE_COUNT 10  // (2-255) Must be less than or equal to the busy count
+#define REPORT_SYNCHRONIZATION_STATE 1  // (1-255) reports after how many spindle sync pulses the syschronization state is reported
 
 // The temporal resolution of the acceleration management subsystem. A higher number gives smoother
 // acceleration, particularly noticeable on machines that run at very high feedrates, but may negatively
@@ -469,7 +491,9 @@
 // electrical interference on the signal cables from external sources. It's recommended to first
 // use shielded signal cables with their shielding connected to ground (old USB/computer cables 
 // work well and are cheap to find) and wire in a low-pass circuit into each limit pin.
-#define ENABLE_SOFTWARE_DEBOUNCE // Default disabled. Uncomment to enable.
+#ifdef LATHE
+	#define ENABLE_SOFTWARE_DEBOUNCE // Define LATHE to enable.
+#endif
 
 // Configures the position after a probing cycle during Grbl's check mode. Disabled sets
 // the position to the probe target, when enabled sets the position to the start position.
