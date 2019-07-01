@@ -35,6 +35,9 @@ volatile uint8_t sys_rt_exec_accessory_override; // Global realtime executor bit
 volatile uint8_t sys_sync_state;			// Global realtime executor bitflag variable for spindle synchronisation.
 volatile uint8_t sys_index_pulse_count;		// Global index pulse counter
 volatile int32_t sys_synchronization_pulse_count;	// Global synchronization pulse counter
+volatile int32_t sys_sync_time;						// Time at  index pulse
+volatile int32_t sys_sync_Last_time;				// Time at last index pulse
+volatile int32_t sys_sync_time_passed;				// Time passed index pulse
 
 #ifdef DEBUG
   volatile uint8_t sys_rt_exec_debug;
@@ -96,6 +99,7 @@ int main(void)
     serial_reset_read_buffer(); // Clear serial read buffer
     gc_init(); // Set g-code parser to default state
     spindle_init();
+	timekeeper_init();
     coolant_init();
     limits_init();
     probe_init();

@@ -58,6 +58,7 @@
 #include "report.h"
 #include "serial.h"
 #include "spindle_control.h"
+#include "timekeeper.h"
 #include "stepper.h"
 #include "jog.h"
 #include "sleep.h"

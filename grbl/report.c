@@ -137,6 +137,8 @@ void report_synchronization_state()
 	print_uint32_base10(sys_index_pulse_count);
 	printPgmString(PSTR("|Ss: "));
 	print_uint32_base10(sys_synchronization_pulse_count);
+	printPgmString(PSTR("|Sp: "));
+	print_uint32_base10(sys_sync_time_passed);
 	report_util_line_feed();
 }
 // Prints feedback messages. This serves as a centralized method to provide additional

@@ -495,7 +495,11 @@ void protocol_exec_rt_system()
    }
    if (bit_istrue(rt_exec,EXEC_SPINDLE_INDEX)){
 	   sys_index_pulse_count++;
+	   sys_sync_time=get_timer_ticks();
 	   bit_false(sys_sync_state,EXEC_SPINDLE_INDEX);
+	   sys_sync_time=get_timer_ticks();
+	   sys_sync_time_passed=sys_sync_Last_time-sys_sync_time;
+	   sys_sync_Last_time=sys_sync_time;
 	   report_synchronization_state();					//report on every index pulse
    }   
   #endif

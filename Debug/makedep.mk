@@ -2,6 +2,8 @@
 # Automatically-generated file. Do not edit or delete the file
 ################################################################################
 
+grbl\timekeeper.c
+
 grbl\main.c
 
 grbl\motion_control.c

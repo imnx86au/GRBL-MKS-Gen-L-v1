@@ -40,6 +40,7 @@ SUBDIRS :=  \
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS +=  \
+../grbl/timekeeper.c \
 ../grbl/main.c \
 ../grbl/motion_control.c \
 ../grbl/gcode.c \
@@ -68,6 +69,7 @@ ASM_SRCS +=
 
 
 OBJS +=  \
+grbl/timekeeper.o \
 grbl/main.o \
 grbl/motion_control.o \
 grbl/gcode.o \
@@ -89,6 +91,7 @@ grbl/sleep.o \
 grbl/jog.o
 
 OBJS_AS_ARGS +=  \
+grbl/timekeeper.o \
 grbl/main.o \
 grbl/motion_control.o \
 grbl/gcode.o \
@@ -110,6 +113,7 @@ grbl/sleep.o \
 grbl/jog.o
 
 C_DEPS +=  \
+grbl/timekeeper.d \
 grbl/main.d \
 grbl/motion_control.d \
 grbl/gcode.d \
@@ -131,6 +135,7 @@ grbl/sleep.d \
 grbl/jog.d
 
 C_DEPS_AS_ARGS +=  \
+grbl/timekeeper.d \
 grbl/main.d \
 grbl/motion_control.d \
 grbl/gcode.d \
@@ -165,6 +170,8 @@ LINKER_SCRIPT_DEP+=
 
 
 # AVR32/GNU C Compiler
+
+
 
 
 
