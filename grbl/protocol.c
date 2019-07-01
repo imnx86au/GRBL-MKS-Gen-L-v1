@@ -487,7 +487,7 @@ void protocol_exec_rt_system()
   }
   #ifdef LATHE		
   //processing spindle pulse and spindle synchronization pulse
-   rt_exec = sys_sync_state;
+   rt_exec = sys_sync_state;	//save the volatile value
    if (bit_istrue(rt_exec,EXEC_SPINDLE_SYNC)){
 	   sys_synchronization_pulse_count++;
 	   bit_false(sys_sync_state,EXEC_SPINDLE_SYNC);
@@ -496,11 +496,10 @@ void protocol_exec_rt_system()
    if (bit_istrue(rt_exec,EXEC_SPINDLE_INDEX)){
 	   sys_index_pulse_count++;
 	   sys_sync_time=get_timer_ticks();
-	   bit_false(sys_sync_state,EXEC_SPINDLE_INDEX);
-	   sys_sync_time=get_timer_ticks();
-	   sys_sync_time_passed=sys_sync_Last_time-sys_sync_time;
+	   sys_sync_time_passed=sys_sync_time-sys_sync_Last_time;
 	   sys_sync_Last_time=sys_sync_time;
 	   report_synchronization_state();					//report on every index pulse
+	   bit_false(sys_sync_state,EXEC_SPINDLE_INDEX);
    }   
   #endif
   

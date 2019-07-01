@@ -133,12 +133,18 @@ void report_alarm_message(uint8_t alarm_code)
 // Prints synchronization state.
 void report_synchronization_state()
 {
+	float RPM;
 	printPgmString(PSTR("Si: "));
 	print_uint32_base10(sys_index_pulse_count);
 	printPgmString(PSTR("|Ss: "));
 	print_uint32_base10(sys_synchronization_pulse_count);
+	printPgmString(PSTR("|St: "));
+	print_uint32_base10(sys_sync_time);
 	printPgmString(PSTR("|Sp: "));
 	print_uint32_base10(sys_sync_time_passed);
+	RPM=((float)60000000UL)/(float)(sys_sync_time_passed*PULSES_PER_ROTATION);
+	printPgmString(PSTR("|RPM: "));
+	printFloat(RPM,3);
 	report_util_line_feed();
 }
 // Prints feedback messages. This serves as a centralized method to provide additional

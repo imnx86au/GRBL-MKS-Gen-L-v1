@@ -33,7 +33,8 @@
 //Define for use on a lathe, enabled by default because this is a GRBL lathe version
 #define LATHE
 //Define folowing lines to enable code for testing this lathe version
-#define LATHETEST1		
+#define LATHETEST1	
+#define PULSES_PER_ROTATION 4UL	
 
 // Define CPU pin map and default settings.
 // NOTE: OEMs can avoid the need to maintain/update the defaults.h and cpu_map.h files and use only

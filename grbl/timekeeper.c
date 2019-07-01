@@ -15,7 +15,13 @@ void timekeeper_init() {
   TCCR5A &= ~((1<<COM5A1) | (1<<COM5A0) | (1<<COM5B1) | (1<<COM5B0)); // Disconnect OC1 output
   TCCR5B |=  (1<<CS11) | (1<<CS10); // pre-scaler: 1/64 (4 microseconds per tick @ 16MHz)
   TIMSK5 |=  (1<<TOIE5); // enable overflow interrupt  
+  timekeeper_reset();
+}
+
+void timekeeper_reset()
+{
   overflows = 0;
+  TCNT5=0;		
 }
 
 uint32_t get_millis() {
