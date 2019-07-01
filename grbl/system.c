@@ -72,7 +72,7 @@ ISR(CONTROL_INT_vect)
     } else if (bit_istrue(pin,CONTROL_PIN_INDEX_SAFETY_DOOR)) {
       bit_true(sys_rt_exec_state, EXEC_SAFETY_DOOR);
 	} else if (bit_istrue(pin,CONTROL_PIN_INDEX_SPINDLE_SYNC)) {
-	 sys_synchronization_count++; bit_true(sys_sync_state, EXEC_SPINDLE_SYNC);   } 
+	 bit_true(sys_sync_state, EXEC_SPINDLE_SYNC);   } 
   }
 }
 

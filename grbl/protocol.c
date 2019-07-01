@@ -485,6 +485,20 @@ void protocol_exec_rt_system()
       }
     }
   }
+  #ifdef LATHE		
+  //processing spindle pulse and spindle synchronization pulse
+   rt_exec = sys_sync_state;
+   if (bit_istrue(rt_exec,EXEC_SPINDLE_SYNC)){
+	   sys_synchronization_pulse_count++;
+	   bit_false(sys_sync_state,EXEC_SPINDLE_SYNC);
+	   //report_synchronization_state();
+   }
+   if (bit_istrue(rt_exec,EXEC_SPINDLE_INDEX)){
+	   sys_index_pulse_count++;
+	   bit_false(sys_sync_state,EXEC_SPINDLE_INDEX);
+	   report_synchronization_state();					//report on every index pulse
+   }   
+  #endif
   
   #ifdef DEBUG
     if (sys_rt_exec_debug) {

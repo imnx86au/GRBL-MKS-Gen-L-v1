@@ -159,10 +159,13 @@ uint8_t limits_get_state()
     }
     //return(limit_state);
   #endif //DEFAULTS_RAMPS_BOARD
-//Ignore Hardware Limit triggers on the Y-Axis (Spindle Index Pulse) when LATHE is defined and not Homing
+//Ignore Hardware Limit triggers on the Y-Axis (Spindle Index Pulse) when LATHE is defined and not Homing, signal index pulse received when not homing
   #ifdef LATHE
-	if (sys.state!=STATE_HOMING)
-	  limit_state &= ~(1<<Y_AXIS);
+	if (sys.state!=STATE_HOMING) {						//when not homing
+	  limit_state &= ~(1<<Y_AXIS);						//Clear state to avoid limit triggered alarm
+      if (pin & get_limit_pin_mask(Y_AXIS))				//If the limit input is set
+	    bit_true(sys_sync_state, EXEC_SPINDLE_INDEX);	//Signal the receive of a spindle index pulse
+	}
   #endif
   return(limit_state);
 }

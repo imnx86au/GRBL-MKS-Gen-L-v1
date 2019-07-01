@@ -133,8 +133,10 @@ void report_alarm_message(uint8_t alarm_code)
 // Prints synchronization state.
 void report_synchronization_state()
 {
-	printPgmString(PSTR("G95:"));
-	print_uint32_base10(sys_synchronization_count);
+	printPgmString(PSTR("Si: "));
+	print_uint32_base10(sys_index_pulse_count);
+	printPgmString(PSTR("|Ss: "));
+	print_uint32_base10(sys_synchronization_pulse_count);
 	report_util_line_feed();
 }
 // Prints feedback messages. This serves as a centralized method to provide additional
@@ -603,8 +605,10 @@ void report_realtime_status()
   #endif
   
   #ifdef LATHE
-      printPgmString(PSTR("|Sync:"));
-      print_uint32_base10(sys_synchronization_count);
+      printPgmString(PSTR("|Sp:"));
+      print_uint32_base10(sys_synchronization_pulse_count);
+      printPgmString(PSTR("|Si:"));
+      print_uint32_base10(sys_index_pulse_count);
   #endif
 
   serial_write('>');
