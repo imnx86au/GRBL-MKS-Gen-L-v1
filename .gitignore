@@ -3,5 +3,8 @@
 *.elf
 *.DS_Store
 *.d
-
+*.atsln
+*.xml
+*.cproj
+*.scc
 README.md
