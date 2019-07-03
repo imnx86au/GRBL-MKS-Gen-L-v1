@@ -491,14 +491,15 @@ void protocol_exec_rt_system()
    if (bit_istrue(rt_exec,EXEC_SPINDLE_SYNC)){
 	   sys_synchronization_pulse_count++;
 	   bit_false(sys_sync_state,EXEC_SPINDLE_SYNC);
-	   //report_synchronization_state();
    }
    if (bit_istrue(rt_exec,EXEC_SPINDLE_INDEX)){
 	   sys_index_pulse_count++;
 	   sys_sync_time=get_timer_ticks();
 	   sys_sync_time_passed=sys_sync_time-sys_sync_Last_time;
 	   sys_sync_Last_time=sys_sync_time;
-	   report_synchronization_state();					//report on every index pulse
+		if (bit_istrue(settings.status_report_mask,BITFLAG_REPORT_SYNC_STATE)) {	//report on every index pulse
+			report_synchronization_state();				
+		}	
 	   bit_false(sys_sync_state,EXEC_SPINDLE_INDEX);
    }   
   #endif

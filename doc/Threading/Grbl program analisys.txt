@@ -37,3 +37,8 @@ The threading state is reported when bit EXEC_SPINDLE_INDEX is set in the sys_sy
 
 Synchronize of the threading Z-speed
 The threading Z-speed is synchronized when bit EXEC_SPINDLE_SYNC is set in the sys_sync_state at every spindle index pulse.
+
+Status report
+Report settings are set in settings.status_report_mask. Currently bit 0 (buffer size) and 1 (report machine positions) are set.
+Add bit7 to report the threading accuracy on every index pulse
+Add bit6 to report spindle speed in realtime status update

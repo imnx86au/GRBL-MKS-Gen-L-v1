@@ -152,11 +152,13 @@ uint8_t gc_execute_line(char *line)
           case 4: case 53:
             word_bit = MODAL_GROUP_G0;
             gc_block.non_modal_command = int_value;
-            if ((int_value == 28) || (int_value == 30) || (int_value == 92)) {
-              if (!((mantissa == 0) || (mantissa == 10))) { FAIL(STATUS_GCODE_UNSUPPORTED_COMMAND); }
-              gc_block.non_modal_command += mantissa;
-              mantissa = 0; // Set to zero to indicate valid non-integer G command.
-            }                
+			//the next 4 lines will never be called and result in wrong error message because mantissa isn't 0 at the end of the switch added check on mantissa
+            //if ((int_value == 28) || (int_value == 30) || (int_value == 92)) {
+              //if (!((mantissa == 0) || (mantissa == 10))) { FAIL(STATUS_GCODE_UNSUPPORTED_COMMAND); }
+              //gc_block.non_modal_command += mantissa;
+              //mantissa = 0; // Set to zero to indicate valid non-integer G command.
+            //}                
+            if (mantissa != 0) { FAIL(STATUS_GCODE_UNSUPPORTED_COMMAND); } // [G4.X G53.X not supported]
             break;
           case 0: case 1: case 2: case 3: case 38:
             // Check for G0/1/2/3/38 being called with G10/28/30/92 on same block.

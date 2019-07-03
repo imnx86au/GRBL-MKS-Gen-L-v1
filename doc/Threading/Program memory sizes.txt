@@ -10,3 +10,6 @@ no init lock GRBL-L-Mega reported by arduino 30340
 Disable hardware limit switch on Y-axis GRBL-L-Mega reported by arduino 30350
 				Program Memory Usage 	:	33652 bytes   12,8 % Full
 				Data Memory Usage 		:	3344 bytes   40,8 % Full
+Added counting and reporting Index and Sync pulses GRBL-L-Mega reported by arduino 31026 / 3366
+				Program Memory Usage 	:	34258 bytes   13,1 % Full
+				Data Memory Usage 		:	3367 bytes   41,1 % Full

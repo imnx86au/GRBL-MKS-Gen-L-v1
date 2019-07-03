@@ -90,8 +90,11 @@ void report_status_message(uint8_t status_code);
 // Prints system alarm messages.
 void report_alarm_message(uint8_t alarm_code);
 
-// Prints system alarm messages.
+// Prints system synchronization state.
 void report_synchronization_state();
+
+// Prints system RPM state.
+void report_RPM_state();
 
 // Prints miscellaneous feedback messages.
 void report_feedback_message(uint8_t message_code);
