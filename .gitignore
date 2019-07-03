@@ -8,3 +8,5 @@
 *.cproj
 *.scc
 README.md
+*.vs
+Debug
