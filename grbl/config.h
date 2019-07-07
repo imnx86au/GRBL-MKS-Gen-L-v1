@@ -36,6 +36,12 @@
 #define LATHETEST1	
 #define PULSES_PER_ROTATION 4UL	
 
+//Define the serial port to use, the mega2560 has four (USART0 .. USART3) uncomment just one
+//#define SERIAL0		//uncomment to use USART0 TX0/RX0 (default)
+//#define SERIAL1		//uncomment to use USART1 RX1/TX1
+//#define SERIAL2		//uncomment to use USART2 RX2/TX2
+#define SERIAL3		//uncomment to use USART3 RX3/TX3
+
 // Define CPU pin map and default settings.
 // NOTE: OEMs can avoid the need to maintain/update the defaults.h and cpu_map.h files and use only
 // one configuration file by placing their specific defaults and pin map at the bottom of this file.
