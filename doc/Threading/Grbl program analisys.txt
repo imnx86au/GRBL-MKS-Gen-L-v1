@@ -47,6 +47,10 @@ Serial communication
 Some registers are defined in cpu_map.h but most registers are named in serial.c Going to change registers by defines to select between serial1 or serial2 to allow flashing and testing without changing wiring or settings.
 serial_init() ISR(SERIAL_UDRE) ISR(SERIAL_RX) serial_write
 
+Gcode.C
+This is where the normal (not real time) Gcode commands are analyzed 
+
+
 Example fschill
 G0 X1 Z0 ; go to start position
 G95 ; Feed per revolution mode
@@ -55,3 +59,14 @@ G4 P1 ; Dwell and wait for spindle sync (in G95 mode)
 G1 F1 Z-20 ; start threading pass
 G0X1 ; retract at end of move
 Z0 ; end of pass
+
+Alternative make G33 implementation
+G90 (absolute distance mode)
+G0 X1 Z0.1 (rapid to position)
+S100 M3 (start spindle turning)
+G33 Z-2 K0.125 (move Z axis to -2 at a rate to equal 0.125 per revolution)
+G0 X1.25 (rapid move tool away from work)
+Z0.1 (rapid move to starting Z position)
+M2 (end program)
+
+G33 equals G92 exept for waiting for a spindle sync and the speed has to be calculated and synchronized, like G91

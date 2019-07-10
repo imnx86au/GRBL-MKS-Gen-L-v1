@@ -149,15 +149,24 @@ uint8_t gc_execute_line(char *line)
               axis_command = AXIS_COMMAND_NON_MODAL;
             }
             // No break. Continues to next line.
-          case 4: case 53:
+          case 4:  //G04 and G04.1 extend Gcode for wait on synchronization pulse. The number of synchronization pulses to wait for is set in the ???
             word_bit = MODAL_GROUP_G0;
             gc_block.non_modal_command = int_value;
-            if ((int_value == 28) || (int_value == 30) || (int_value == 92)) {
-              if (!((mantissa == 0) || (mantissa == 10))) { FAIL(STATUS_GCODE_UNSUPPORTED_COMMAND); }
-              gc_block.non_modal_command += mantissa;
-              mantissa = 0; // Set to zero to indicate valid non-integer G command.
-            }                
-            break;
+            if (!((mantissa == 0) || (mantissa == 1))) { FAIL(STATUS_GCODE_UNSUPPORTED_COMMAND); }
+            //gc_block.non_modal_command += mantissa;
+            mantissa = 0; // Set to zero to indicate valid non-integer G command.
+            break;      
+		  case 53:
+          word_bit = MODAL_GROUP_G0;
+          gc_block.non_modal_command = int_value;
+          //the next 4 lines will never be called and result in wrong error message because mantissa isn't 0 at the end of the switch added check on mantissa
+          //if ((int_value == 28) || (int_value == 30) || (int_value == 92)) {
+          //if (!((mantissa == 0) || (mantissa == 10))) { FAIL(STATUS_GCODE_UNSUPPORTED_COMMAND); }
+          //gc_block.non_modal_command += mantissa;
+          //mantissa = 0; // Set to zero to indicate valid non-integer G command.
+          //}
+          if (mantissa != 0) { FAIL(STATUS_GCODE_UNSUPPORTED_COMMAND); } // [G4.X G53.X not supported]
+          break;
           case 0: case 1: case 2: case 3: case 38:
             // Check for G0/1/2/3/38 being called with G10/28/30/92 on same block.
             // * G43.1 is also an axis command but is not explicitly defined this way.

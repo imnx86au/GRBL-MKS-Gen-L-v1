@@ -11,3 +11,11 @@
  this GCode will do a 1.5 mm pitch thread 10 threads long.
  G95				enter the Feed per Revolution mode
  G01 F1.5 Z-15		Move to Z position -15, advance Z 1.5 mm for every revolution
+
+G0 X1 Z0 ; go to start position
+G95 ; Feed per revolution mode
+G0 X-0.5 ; go to cutting depth, clear of workpiece
+G4 P1 ; Dwell and wait for spindle sync (in G95 mode)
+G1 F1 Z-20 ; start threading pass
+G0X1 ; retract at end of move
+Z0 ; end of pass
