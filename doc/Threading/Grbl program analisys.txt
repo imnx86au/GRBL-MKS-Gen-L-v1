@@ -50,6 +50,20 @@ serial_init() ISR(SERIAL_UDRE) ISR(SERIAL_RX) serial_write
 Gcode.C
 This is where the normal (not real time) Gcode commands are analyzed 
 
+Motion_control.c mc_line()
+This is where absolute liniair motions are added to the planner. G33 can start after the planner buffer is empty, there are 4 spindle sync pulses and the inital speed is set.
+Here we have to change the routine!
+
+
+Implement G33 Gcode
+done copy G1 to G33
+Change G33 to hold processing until the receiving of 4 index pulses
+Change G33 to hold processing until the planner buffer is empty
+Change G33 to set speed before starting
+Change G33 to accept K parameter
+Change G33 to reject F parameter
+Change to update G33 block feedrate at every sync pulse
+done i guesss 
 
 Example fschill
 G0 X1 Z0 ; go to start position
@@ -62,11 +76,11 @@ Z0 ; end of pass
 
 Alternative make G33 implementation
 G90 (absolute distance mode)
-G0 X1 Z0.1 (rapid to position)
+G1 X1 Z0.1 (rapid to position)
 S100 M3 (start spindle turning)
 G33 Z-2 K0.125 (move Z axis to -2 at a rate to equal 0.125 per revolution)
 G0 X1.25 (rapid move tool away from work)
 Z0.1 (rapid move to starting Z position)
 M2 (end program)
 
-G33 equals G92 exept for waiting for a spindle sync and the speed has to be calculated and synchronized, like G91
+G33 equals G1 except for waiting for a spindle sync and the speed has to be calculated and synchronized, like G1

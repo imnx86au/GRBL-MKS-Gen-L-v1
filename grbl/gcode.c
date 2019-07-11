@@ -175,7 +175,16 @@ uint8_t gc_execute_line(char *line)
               mantissa = 0; // Set to zero to indicate valid non-integer G command.
             }  
             break;
-          case 17: case 18: case 19:
+          case 33:
+            // Check for G0/1/2/3/38 being called with G10/28/30/92 on same block.
+            // * G43.1 is also an axis command but is not explicitly defined this way.
+            if (axis_command) { FAIL(STATUS_GCODE_AXIS_COMMAND_CONFLICT); } // [Axis word/command conflict]
+            axis_command = AXIS_COMMAND_MOTION_MODE;
+            word_bit = MODAL_GROUP_G1;
+            //gc_block.modal.motion = MOTION_MODE_LINEAR;
+            gc_block.modal.motion = MOTION_MODE_SPINDLE_SYNC;
+            break;	 
+	     case 17: case 18: case 19:
             word_bit = MODAL_GROUP_G2;
             gc_block.modal.plane_select = int_value - 17;
             break;
@@ -1027,7 +1036,6 @@ uint8_t gc_execute_line(char *line)
       break;
   }
 
-
   // [20. Motion modes ]:
   // NOTE: Commands G10,G28,G30,G92 lock out and prevent axis words from use in motion modes.
   // Enter motion modes only if there are axis words or a motion mode command word in the block.
@@ -1037,6 +1045,17 @@ uint8_t gc_execute_line(char *line)
       uint8_t gc_update_pos = GC_UPDATE_POS_TARGET;
       if (gc_state.modal.motion == MOTION_MODE_LINEAR) {
         mc_line(gc_block.values.xyz, pl_data);
+      } else if (gc_state.modal.motion == MOTION_MODE_SPINDLE_SYNC) {
+		 protocol_buffer_synchronize(); // Sync and finish all remaining buffered motions before moving on.
+		 sys_index_pulse_count=0; //set the spindle index pulse count to 0
+		 while (sys_index_pulse_count<SpindleIndexPulsesBeforeStartG33){
+			protocol_exec_rt_system();		//process real time commands until the spindle has made enough revolutions
+		 }
+	    //calculate the spindle speed
+		//calculate the feed rate
+		//set the feed rate		 
+		pl_data->feed_rate=0;
+         mc_line(gc_block.values.xyz, pl_data);	//execute the motion 
       } else if (gc_state.modal.motion == MOTION_MODE_SEEK) {
         pl_data->condition |= PL_COND_FLAG_RAPID_MOTION; // Set rapid motion condition flag.
         mc_line(gc_block.values.xyz, pl_data);
