@@ -40,7 +40,7 @@ void protocol_main_loop()
   // Perform some machine checks to make sure everything is good to go.
   #ifdef CHECK_LIMITS_AT_INIT
     if (bit_istrue(settings.flags, BITFLAG_HARD_LIMIT_ENABLE)) {
-      if (limits_get_state()) {
+      if (limits_get_state(LIMIT_PIN_MASK_ALL_EXCEPT_Y_AXIS)) {
         sys.state = STATE_ALARM; // Ensure alarm state is active.
         report_feedback_message(MESSAGE_CHECK_LIMITS);
       }
@@ -241,7 +241,24 @@ void protocol_exec_rt_system()
     }
     system_clear_exec_alarm(); // Clear alarm
   }
-
+  
+  #ifdef LATHE
+  //processing spindle pulse and spindle synchronization pulse
+  rt_exec = sys_sync_state;	//save the volatile value
+  if (bit_istrue(rt_exec,EXEC_SPINDLE_SYNC)){
+	  sys_sync_timer_tics_passed=get_timer_ticks()-sys_sync_Last_timer_tics;
+	  sys_sync_Last_timer_tics+=sys_sync_timer_tics_passed;
+	  sys_synchronization_pulse_count++;
+	  bit_false(sys_sync_state,EXEC_SPINDLE_SYNC);
+    }
+   if (bit_istrue(rt_exec,EXEC_SPINDLE_INDEX)){
+	  //report_RPM_state();
+	  if (bit_istrue(settings.status_report_mask,BITFLAG_REPORT_SYNC_STATE)) 	//report on every index pulse
+		  report_synchronization_state();
+	 bit_false(sys_sync_state,EXEC_SPINDLE_INDEX);
+	  }
+  #endif
+  
   rt_exec = sys_rt_exec_state; // Copy volatile sys_rt_exec_state.
   if (rt_exec) {
 
@@ -485,24 +502,7 @@ void protocol_exec_rt_system()
       }
     }
   }
-  #ifdef LATHE		
-  //processing spindle pulse and spindle synchronization pulse
-   rt_exec = sys_sync_state;	//save the volatile value
-   if (bit_istrue(rt_exec,EXEC_SPINDLE_SYNC)){
-	   sys_synchronization_pulse_count++;
-	   bit_false(sys_sync_state,EXEC_SPINDLE_SYNC);
-   }
-   if (bit_istrue(rt_exec,EXEC_SPINDLE_INDEX)){
-	   sys_index_pulse_count++;
-	   sys_sync_time=get_timer_ticks();
-	   sys_sync_time_passed=sys_sync_time-sys_sync_Last_time;
-	   sys_sync_Last_time=sys_sync_time;
-		if (bit_istrue(settings.status_report_mask,BITFLAG_REPORT_SYNC_STATE)) {	//report on every index pulse
-			report_synchronization_state();				
-		}	
-	   bit_false(sys_sync_state,EXEC_SPINDLE_INDEX);
-   }   
-  #endif
+
   
   #ifdef DEBUG
     if (sys_rt_exec_debug) {
@@ -727,8 +727,6 @@ static void protocol_exec_rt_suspend()
           }
 
         }
-
-
       } else {
 
         // Feed hold manager. Controls spindle stop override states.

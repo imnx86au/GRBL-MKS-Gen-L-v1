@@ -33,6 +33,10 @@
 #include "grbl.h" // For Arduino IDE compatibility.
 
 //Define for use on a lathe, enabled by default because this is a GRBL lathe version
+#define LIMIT_PIN_MASK_Y_AXIS 2					//Y-Axis pin
+#define LIMIT_PIN_MASK_ALL	7					//All pins
+#define LIMIT_PIN_MASK_ALL_EXCEPT_Y_AXIS 5		//Y-Axis pin
+
 #define LATHE
 //Define following lines to enable code for testing this lathe version
 #define LATHETEST1	
@@ -447,7 +451,7 @@
 // available RAM, like when re-compiling for a Mega or Sanguino. Or decrease if the Arduino
 // begins to crash due to the lack of available RAM or if the CPU is having trouble keeping
 // up with planning new incoming motions as they are executed. 
-// #define BLOCK_BUFFER_SIZE 36  // Uncomment to override default in planner.h.
+// #define BLOCK_BUFFER_SIZE 25  // Uncomment to override default in planner.h.
 
 // Governs the size of the intermediary step segment buffer between the step execution algorithm
 // and the planner blocks. Each segment is set of steps executed at a constant velocity over a
@@ -516,7 +520,8 @@
 // that the switches don't bounce, we recommend enabling this option. This will help prevent
 // triggering a hard limit when the machine disengages from the switch.
 // NOTE: This option has no effect if SOFTWARE_DEBOUNCE is enabled.
-// #define HARD_LIMIT_FORCE_STATE_CHECK // Default disabled. Uncomment to enable.
+// This option is disabled in the GRBL-L versions to safe coe
+// #define HARD_LIMIT_FORCE_STATE_CHECK // Default disabled. Uncomment to enable. 
 
 // Adjusts homing cycle search and locate scalars. These are the multipliers used by Grbl's
 // homing cycle to ensure the limit switches are engaged and cleared through each phase of

@@ -137,22 +137,30 @@ void report_synchronization_state()
 	print_uint32_base10(sys_index_pulse_count);
 	printPgmString(PSTR("|Ss: "));
 	print_uint32_base10(sys_synchronization_pulse_count);
-	printPgmString(PSTR("|St: "));
-	print_uint32_base10(sys_sync_time);
 	printPgmString(PSTR("|Sp: "));
-	print_uint32_base10(sys_sync_time_passed);
-	report_RPM_state();
+	print_uint32_base10(sys_sync_timer_tics_passed);
+	printPgmString(PSTR("|Ip: "));
+	print_uint32_base10(sys_index_timer_tics_passed);
+	//report_RPM_state();
 	report_util_line_feed();
 }
-
-// Prints RPM state when bit is set in report mask.
-void report_RPM_state()
+//return the RPM based on the time between spindle index pulses
+uint32_t RPM()
 {
-	float RPM;
-	RPM=((float)60000000UL)/(float)(sys_sync_time_passed*PULSES_PER_ROTATION);
-	printPgmString(PSTR("|RPM: "));
-	printFloat(RPM,3);
+uint32_t tmp;
+  ATOMIC_BLOCK(ATOMIC_RESTORESTATE){		// Avoid changing during calculations so store temporary
+    tmp = sys_index_timer_tics_passed;
+  }
+  //if (tmp < (uint32_t) 150000000)			// >> 1 RPM
+    //return  0;
+  return (uint32_t) 15000000  / (tmp);		//every tic is 4 us, in stead of multiplying the time passed, divide the 60.000.0000 (const 1 second) by 4
 }
+//// Prints RPM state when bit is set in report mask.
+//void report_RPM_state()
+//{
+	//printPgmString(PSTR("|RPM:"));
+	//print_uint32_base10(RPM());
+//}
 
 // Prints feedback messages. This serves as a centralized method to provide additional
 // user feedback for things that are not of the status/alarm message protocol. These are
@@ -556,11 +564,12 @@ void report_realtime_status()
     printPgmString(PSTR("|FS:"));
     printFloat_RateValue(st_get_realtime_rate());
     serial_write(',');
+    //printFloat(sys.spindle_speed,N_DECIMAL_RPMVALUE);
     printFloat(sys.spindle_speed,N_DECIMAL_RPMVALUE);
   #endif
 
   #ifdef REPORT_FIELD_PIN_STATE
-    uint8_t lim_pin_state = limits_get_state();
+    uint8_t lim_pin_state = limits_get_state(LIMIT_PIN_MASK_ALL);
     uint8_t ctrl_pin_state = system_control_get_state();
     uint8_t prb_pin_state = probe_get_state();
     if (lim_pin_state | ctrl_pin_state | prb_pin_state) {
@@ -619,12 +628,12 @@ void report_realtime_status()
     }
   #endif
   
-  #ifdef LATHE
-  // Report realtime spindle speed when bit is set in report mask
-  if (bit_istrue(settings.status_report_mask,BITFLAG_RT_STATUS_RPM_STATE) ) {
-	  report_RPM_state();
-  }
-  #endif
+  //#ifdef LATHE
+  //// Report realtime spindle speed when bit is set in report mask
+  //if (bit_istrue(settings.status_report_mask,BITFLAG_RT_STATUS_RPM_STATE) ) {
+	  //report_RPM_state();
+  //}
+  //#endif
 
   serial_write('>');
   report_util_line_feed();

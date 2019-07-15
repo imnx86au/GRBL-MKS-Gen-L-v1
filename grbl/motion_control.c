@@ -209,7 +209,7 @@ void mc_homing_cycle(uint8_t cycle_mask)
   // with machines with limits wired on both ends of travel to one limit pin.
   // TODO: Move the pin-specific LIMIT_PIN call to limits.c as a function.
   #ifdef LIMITS_TWO_SWITCHES_ON_AXES
-    if (limits_get_state()) {
+    if (limits_get_state(LIMIT_PIN_MASK_ALL)) {
       mc_reset(); // Issue system reset and ensure spindle and coolant are shutdown.
       system_set_exec_alarm(EXEC_ALARM_HARD_LIMIT);
       return;

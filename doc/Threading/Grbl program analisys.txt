@@ -76,7 +76,7 @@ Z0 ; end of pass
 
 Alternative make G33 implementation
 G90 (absolute distance mode)
-G1 X1 Z0.1 (rapid to position)
+G0 X1 Z0.1 (rapid to position)
 S100 M3 (start spindle turning)
 G33 Z-2 K0.125 (move Z axis to -2 at a rate to equal 0.125 per revolution)
 G0 X1.25 (rapid move tool away from work)
@@ -84,3 +84,5 @@ Z0.1 (rapid move to starting Z position)
 M2 (end program)
 
 G33 equals G1 except for waiting for a spindle sync and the speed has to be calculated and synchronized, like G1
+
+G90 G33 Z-20 K1

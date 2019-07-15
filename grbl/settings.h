@@ -54,8 +54,8 @@
 // Define status reporting boolean enable bit flags in settings.status_report_mask
 #define BITFLAG_RT_STATUS_POSITION_TYPE     bit(0)
 #define BITFLAG_RT_STATUS_BUFFER_STATE      bit(1)
-#define BITFLAG_RT_STATUS_RPM_STATE			bit(2)
-#define BITFLAG_REPORT_SYNC_STATE			bit(3)
+//#define BITFLAG_RT_STATUS_RPM_STATE			bit(2)
+#define BITFLAG_REPORT_SYNC_STATE			bit(2)
 
 // Define settings restore bitflags.
 #define SETTINGS_RESTORE_DEFAULTS bit(0)

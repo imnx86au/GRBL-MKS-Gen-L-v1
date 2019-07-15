@@ -1,20 +1,24 @@
-#define MinSpeedRPM 30L       // 30 RPM Speed slowest
-#define MaxSpeedRPM 600L      // 600 RPM Speed fastest
+#define MinRPM 30L       // 10 RPM Speed slowest
+#define MaxRPM 600L      // 600 RPM Speed fastest
 
 #define PotMeter A0       //Potmeter pin, must be analog, not A4 or A5 on arduino (SDA SCL)
-#define AverageCount 25
+#define AverageCount 5
 #define MinAdc 50           //add dead band on start
 #define MaxAdc 975          //add dead band on end
 #define PotMeter A0         //Potmeter pin, must be analog, not A4 or A5 on arduino (SDA SCL)
 #define AverageCount 25
 
 #define PulsesPerRevolution 4
-#define PulseHighMin 20
+#define PulseHighMin 10
 
 #define IndexPin 13
 #define SyncPin 12
 
-#define DebugInfo
+//#define DebugInfo
+//define one or none of the fixed speed simulation setting
+//#define FixSpeed30RPM
+//#define FixSpeed120RPM
+//#define FixSpeed600RPM
 
 int ReadPotmeter()
 {
@@ -27,31 +31,31 @@ int ReadPotmeter()
   return Sum / AverageCount;
 }
 
-long CalculateDelayTime(long SpeedRPM)
+long CalculateDelayTime(long RPM)
 {
-  return  60000L / (SpeedRPM * PulsesPerRevolution );
+  return  60000L / (RPM * PulsesPerRevolution );
 }
 
-long MapPotToSpeed(long Pot)
+long MapPotToRPM(long Pot)
 {
-  long Speed = map(Pot, MinAdc, MaxAdc, MinSpeedRPM, MaxSpeedRPM);
-  if (Speed < MinSpeedRPM) return MinSpeedRPM;
-  if (Speed > MaxSpeedRPM) return MaxSpeedRPM;
-  return Speed;
+  long RPM = map(Pot, MinAdc, MaxAdc, MinRPM, MaxRPM);
+  if (RPM < MinRPM) return MinRPM;
+  if (RPM > MaxRPM) return MaxRPM;
+  return RPM;
 }
 
-long MapSpeedToDelay(long Speed)
+long MapRPMtoDelay(long RPM)
 {
-  if (Speed < MinSpeedRPM) Speed = MinSpeedRPM;
-  if (Speed > MaxSpeedRPM) Speed = MaxSpeedRPM;
-  return  CalculateDelayTime(Speed);
+  if (RPM < MinRPM) RPM = MinRPM;
+  if (RPM > MaxRPM) RPM = MaxRPM;
+  return  CalculateDelayTime(RPM);
 }
 
 long MapPotToDelay(long Pot)
 {
   if (Pot < MinAdc) Pot = MinAdc;
   if (Pot > MaxAdc) Pot = MaxAdc;
-  return MapSpeedToDelay(MapPotToSpeed(Pot));
+  return MapRPMtoDelay(MapPotToRPM(Pot));
 }
 
 void ShowInfo()
@@ -60,7 +64,7 @@ void ShowInfo()
   int ADC;
   ADC = ReadPotmeter();
   Serial.print("ADC: "); Serial.print(ADC);
-  Serial.print(" RPM: "); Serial.print(MapPotToSpeed(ADC));
+  Serial.print(" RPM: "); Serial.print(MapPotToRPM(ADC));
   Serial.print(" Sync Pulse Delay: "); Serial.print(MapPotToDelay(ADC));
   Serial.println();
 #endif
@@ -75,25 +79,35 @@ void setup()
   pinMode(SyncPin, OUTPUT);     // Initialize the  pin as aput
 }
 
+
 void loop()
 {
   int PulseTime;
-  int PulseHigh;
+  int PulseLow;
   for (;;)
   {
+    // if a fixed RPM is selecte, set speed accordinly
+#if defined (FixSpeed30RPM)
+    PulseTime = MapRPMtoDelay(30);
+#elif defined FixSpeed120RPM
+    PulseTime = MapRPMtoDelay(120);
+#elif defined FixSpeed600RPM
+    PulseTime = MapRPMToDelay(600);
+#else  //if no fixed speed is selected, get the settings from the potmeter
     PulseTime = MapPotToDelay(ReadPotmeter());
-    PulseHigh=PulseTime/2;
-    if (PulseHigh> PulseHighMin)
-      PulseHigh=PulseHighMin;
+#endif
+#ifdef DebugInfo
     ShowInfo();
+#endif
+    PulseTime -= PulseHighMin;
     digitalWrite(IndexPin, HIGH);   // Turn the LED on (Note that LOW is the voltage level
     for (int i = 0; i < PulsesPerRevolution; i++)
     {
       digitalWrite(SyncPin, HIGH);     // Turn the LED on (Note that LOW is the voltage level
-      delay(PulseHigh);                         // Wait for a second
+      delay(PulseHighMin);                         // Wait for a second
       digitalWrite(SyncPin, LOW);    // Turn the LED off by making the voltage HIGH
       digitalWrite(IndexPin, LOW);   // Turn the LED off by making the voltage HIGH
-      delay(PulseTime - PulseHigh);    // Wait for two seconds (to demonstrate the active low LED)
+      delay(PulseTime);    // Wait for two seconds (to demonstrate the active low LED)
     }
   }
 }

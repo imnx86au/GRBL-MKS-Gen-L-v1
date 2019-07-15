@@ -158,7 +158,7 @@ uint8_t gc_execute_line(char *line)
               mantissa = 0; // Set to zero to indicate valid non-integer G command.
             }                
             break;
-          case 0: case 1: case 2: case 3: case 38:
+          case 0: case 1: case 2: case 3: case 33: case 38:
             // Check for G0/1/2/3/38 being called with G10/28/30/92 on same block.
             // * G43.1 is also an axis command but is not explicitly defined this way.
             if (axis_command) { FAIL(STATUS_GCODE_AXIS_COMMAND_CONFLICT); } // [Axis word/command conflict]
@@ -167,6 +167,7 @@ uint8_t gc_execute_line(char *line)
           case 80:
             word_bit = MODAL_GROUP_G1;
             gc_block.modal.motion = int_value;
+			//if (int_value == 33) gc_block.modal.motion = MOTION_MODE_SPINDLE_SYNC;	//
             if (int_value == 38){
               if (!((mantissa == 20) || (mantissa == 30) || (mantissa == 40) || (mantissa == 50))) {
                 FAIL(STATUS_GCODE_UNSUPPORTED_COMMAND); // [Unsupported G38.x command]
@@ -175,15 +176,6 @@ uint8_t gc_execute_line(char *line)
               mantissa = 0; // Set to zero to indicate valid non-integer G command.
             }  
             break;
-          case 33:
-            // Check for G0/1/2/3/38 being called with G10/28/30/92 on same block.
-            // * G43.1 is also an axis command but is not explicitly defined this way.
-            if (axis_command) { FAIL(STATUS_GCODE_AXIS_COMMAND_CONFLICT); } // [Axis word/command conflict]
-            axis_command = AXIS_COMMAND_MOTION_MODE;
-            word_bit = MODAL_GROUP_G1;
-            //gc_block.modal.motion = MOTION_MODE_LINEAR;
-            gc_block.modal.motion = MOTION_MODE_SPINDLE_SYNC;
-            break;	 
 	     case 17: case 18: case 19:
             word_bit = MODAL_GROUP_G2;
             gc_block.modal.plane_select = int_value - 17;
@@ -1053,8 +1045,9 @@ uint8_t gc_execute_line(char *line)
 		 }
 	    //calculate the spindle speed
 		//calculate the feed rate
-		//set the feed rate		 
-		pl_data->feed_rate=0;
+		//set the feed rate	
+		//set the start z	 
+		pl_data->feed_rate=30;
          mc_line(gc_block.values.xyz, pl_data);	//execute the motion 
       } else if (gc_state.modal.motion == MOTION_MODE_SEEK) {
         pl_data->condition |= PL_COND_FLAG_RAPID_MOTION; // Set rapid motion condition flag.

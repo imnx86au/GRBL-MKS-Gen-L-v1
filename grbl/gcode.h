@@ -99,7 +99,6 @@
 // Modal Group G5: Feed rate mode
 #define FEED_RATE_MODE_UNITS_PER_MIN  0 // G94 (Default: Must be zero)
 #define FEED_RATE_MODE_INVERSE_TIME   1 // G93 (Do not alter value)
-//#define FEED_RATE_MODE_UNITS_PER_REV  2 // G33 (Do not alter value)
 
 // Modal Group G6: Units mode
 #define UNITS_MODE_MM 0 // G21 (Default: Must be zero)

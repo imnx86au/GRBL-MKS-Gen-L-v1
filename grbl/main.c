@@ -33,11 +33,12 @@ volatile uint8_t sys_rt_exec_motion_override; // Global realtime executor bitfla
 volatile uint8_t sys_rt_exec_accessory_override; // Global realtime executor bitflag variable for spindle/coolant overrides.
 
 volatile uint8_t sys_sync_state;			// Global realtime executor bitflag variable for spindle synchronisation.
-volatile uint8_t sys_index_pulse_count;		// Global index pulse counter
-volatile int32_t sys_synchronization_pulse_count;	// Global synchronization pulse counter
-volatile int32_t sys_sync_time;						// Time at  index pulse
-volatile int32_t sys_sync_Last_time;				// Time at last index pulse
-volatile int32_t sys_sync_time_passed;				// Time passed index pulse
+volatile uint32_t sys_index_pulse_count;		// Global index pulse counter
+volatile uint32_t sys_synchronization_pulse_count;	// Global synchronization pulse counter
+volatile uint32_t sys_sync_Last_timer_tics;				// Time at last sync pulse
+volatile uint32_t sys_sync_timer_tics_passed;				// Time passed sync pulse
+volatile uint32_t sys_index_Last_timer_tics;				// Time at last index pulse
+volatile uint32_t sys_index_timer_tics_passed=0;	    	// Time passed index pulse
 
 #ifdef DEBUG
   volatile uint8_t sys_rt_exec_debug;
@@ -85,7 +86,7 @@ int main(void)
     sys.f_override = DEFAULT_FEED_OVERRIDE;  // Set to 100%
     sys.r_override = DEFAULT_RAPID_OVERRIDE; // Set to 100%
     sys.spindle_speed_ovr = DEFAULT_SPINDLE_SPEED_OVERRIDE; // Set to 100%
-		memset(sys_probe_position,0,sizeof(sys_probe_position)); // Clear probe position.
+	memset(sys_probe_position,0,sizeof(sys_probe_position)); // Clear probe position.
     sys_probe_state = 0;
     sys_rt_exec_state = 0;
     sys_rt_exec_alarm = 0;

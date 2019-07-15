@@ -26,6 +26,7 @@
 #define GRBL_VERSION_BUILD "20180813.Mega"
 
 // Define standard libraries used by Grbl.
+#include <util/atomic.h>
 #include <avr/io.h>
 #include <avr/pgmspace.h>
 #include <avr/interrupt.h>
