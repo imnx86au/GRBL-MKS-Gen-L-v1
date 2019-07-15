@@ -247,4 +247,7 @@ uint8_t gc_execute_line(char *line);
 // Set g-code parser position. Input in steps.
 void gc_sync_position();
 
+//// Calculates the feed rate based on the spindle speed, and the target position at the next sync pulse
+//void gc_sync_spindle_speed(plan_line_data_t *pl_data,parser_block_t *gc_block);
+
 #endif

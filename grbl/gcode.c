@@ -57,6 +57,11 @@ void gc_sync_position()
   system_convert_array_steps_to_mpos(gc_state.position,sys_position);
 }
 
+//// Calculates the feed rate based on the spindle speed, and the target position at the next sync pulse
+//void gc_sync_spindle_speed(plan_line_data_t *pl_data,parser_block_t *gc_block)
+//{
+  //pl_data->feed_rate=gc_block.values.k*sys.spindle_speed;//*(float);//SPINDLE_SYNC_PULSES_PER_ROTATION;
+//}
 
 // Executes one line of 0-terminated G-Code. The line is assumed to contain only uppercase
 // characters and signed floating point values (no whitespace). Comments and block delete
@@ -654,13 +659,14 @@ uint8_t gc_execute_line(char *line)
     // the value must be positive. In inverse time mode, a positive value must be passed with each block.
     } else {
       // Check if feed rate is defined for the motion modes that require it.
-	  if (gc_block.modal.motion!=MOTION_MODE_SPINDLE_SYNC)   //G33 doesn't require feedrate. Error message could be implemented here
+	  if (gc_block.modal.motion!=MOTION_MODE_SPINDLE_SYNC)   //G33 doesn't require feedrate. 
 		if (gc_block.values.f == 0.0) { FAIL(STATUS_GCODE_UNDEFINED_FEED_RATE); } // [Feed rate undefined]
       switch (gc_block.modal.motion) {
         case MOTION_MODE_SPINDLE_SYNC:
 			if  bit_isfalse(value_words,bit(WORD_K)) { FAIL(STATUS_GCODE_VALUE_WORD_MISSING); }					// [K value not given]
 			else if  bit_istrue(value_words,bit(WORD_F)) { FAIL(STATUS_GCODE_UNUSED_WORDS); }					// [F value given]
             else if (gc_block.modal.units == UNITS_MODE_INCHES) {gc_block.values.ijk[Z_AXIS] *= MM_PER_INCH;}	//calculate for inches
+			gc_block.values.k=gc_block.values.ijk[Z_AXIS];														//Set the feed per revolution in the (correct) k variable
             bit_false(value_words,bit(WORD_K));	//clear K word
         case MOTION_MODE_LINEAR:
           // [G1 Errors]: Feed rate undefined. Axis letter not configured or without real value.
@@ -1032,7 +1038,6 @@ uint8_t gc_execute_line(char *line)
       system_flag_wco_change();
       break;
   }
-
   // [20. Motion modes ]:
   // NOTE: Commands G10,G28,G30,G92 lock out and prevent axis words from use in motion modes.
   // Enter motion modes only if there are axis words or a motion mode command word in the block.
@@ -1045,14 +1050,11 @@ uint8_t gc_execute_line(char *line)
       } else if (gc_state.modal.motion == MOTION_MODE_SPINDLE_SYNC) {
 		 protocol_buffer_synchronize(); // Sync and finish all remaining buffered motions before moving on.
 		 sys_index_pulse_count=0; //set the spindle index pulse count to 0
-		 while (sys_index_pulse_count<SpindleIndexPulsesBeforeStartG33){
-			protocol_exec_rt_system();		//process real time commands until the spindle has made enough revolutions
+		 while (sys_index_pulse_count<SPINDLE_INDEX_PULSES_BEFORE_START_G33){
+			protocol_exec_rt_system();		//process real time commands until the spindle has made enough revolutions, mybe this has to be removed to improve starting at the right position
 		 }
-	    //calculate the spindle speed
-		//calculate the feed rate
-		//set the feed rate	
-		//set the start z	 
-		pl_data->feed_rate=30;
+		 pl_data->feed_rate=gc_block.values.k * sys.spindle_speed;		//set the spindle speed to start
+		 //set the start z	 
          mc_line(gc_block.values.xyz, pl_data);	//execute the motion 
       } else if (gc_state.modal.motion == MOTION_MODE_SEEK) {
         pl_data->condition |= PL_COND_FLAG_RAPID_MOTION; // Set rapid motion condition flag.
