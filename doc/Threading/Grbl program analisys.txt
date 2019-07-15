@@ -57,11 +57,13 @@ Here we have to change the routine!
 
 Implement G33 Gcode
 done copy G1 to G33
-Change G33 to hold processing until the receiving of 4 index pulses
-Change G33 to hold processing until the planner buffer is empty
-Change G33 to set speed before starting
-Change G33 to accept K parameter
-Change G33 to reject F parameter
+* Change G33 to hold processing until the receiving of 4 index pulses
+* Change G33 to hold processing until the planner buffer is empty
+* Change G33 to set speed before starting
+* Change G33 to accept K parameter
+* Change G33 to reject F parameter 
+Change G33 to start using the right feedrate 
+Change to update G33 block feedrate at every index pulse
 Change to update G33 block feedrate at every sync pulse
 done i guesss 
 

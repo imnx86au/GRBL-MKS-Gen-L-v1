@@ -297,7 +297,7 @@ uint8_t gc_execute_line(char *line)
           // case 'H': // Not supported
           case 'I': word_bit = WORD_I; gc_block.values.ijk[X_AXIS] = value; ijk_words |= (1<<X_AXIS); break;
           case 'J': word_bit = WORD_J; gc_block.values.ijk[Y_AXIS] = value; ijk_words |= (1<<Y_AXIS); break;
-          case 'K': word_bit = WORD_K; gc_block.values.ijk[Z_AXIS] = value; ijk_words |= (1<<Z_AXIS); break;
+          case 'K': word_bit = WORD_K; gc_block.values.ijk[Z_AXIS] = value; ijk_words |= (1<<Z_AXIS); break;  //K is also used in G33
           case 'L': word_bit = WORD_L; gc_block.values.l = int_value; break;
           case 'N': word_bit = WORD_N; gc_block.values.n = trunc(value); break;
           case 'P': word_bit = WORD_P; gc_block.values.p = value; break;
@@ -650,13 +650,18 @@ uint8_t gc_execute_line(char *line)
       // Axis words are optional. If missing, set axis command flag to ignore execution.
       if (!axis_words) { axis_command = AXIS_COMMAND_NONE; }
 
-    // All remaining motion modes (all but G0 and G80), require a valid feed rate value. In units per mm mode,
+    // All remaining motion modes (all but G0, G33 and G80), require a valid feed rate value. In units per mm mode,
     // the value must be positive. In inverse time mode, a positive value must be passed with each block.
     } else {
       // Check if feed rate is defined for the motion modes that require it.
-      if (gc_block.values.f == 0.0) { FAIL(STATUS_GCODE_UNDEFINED_FEED_RATE); } // [Feed rate undefined]
-
+	  if (gc_block.modal.motion!=MOTION_MODE_SPINDLE_SYNC)   //G33 doesn't require feedrate. Error message could be implemented here
+		if (gc_block.values.f == 0.0) { FAIL(STATUS_GCODE_UNDEFINED_FEED_RATE); } // [Feed rate undefined]
       switch (gc_block.modal.motion) {
+        case MOTION_MODE_SPINDLE_SYNC:
+			if  bit_isfalse(value_words,bit(WORD_K)) { FAIL(STATUS_GCODE_VALUE_WORD_MISSING); }					// [K value not given]
+			else if  bit_istrue(value_words,bit(WORD_F)) { FAIL(STATUS_GCODE_UNUSED_WORDS); }					// [F value given]
+            else if (gc_block.modal.units == UNITS_MODE_INCHES) {gc_block.values.ijk[Z_AXIS] *= MM_PER_INCH;}	//calculate for inches
+            bit_false(value_words,bit(WORD_K));	//clear K word
         case MOTION_MODE_LINEAR:
           // [G1 Errors]: Feed rate undefined. Axis letter not configured or without real value.
           // Axis words are optional. If missing, set axis command flag to ignore execution.
