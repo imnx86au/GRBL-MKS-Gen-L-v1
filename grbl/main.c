@@ -32,13 +32,16 @@ volatile uint8_t sys_rt_exec_alarm;   // Global realtime executor bitflag variab
 volatile uint8_t sys_rt_exec_motion_override; // Global realtime executor bitflag variable for motion-based overrides.
 volatile uint8_t sys_rt_exec_accessory_override; // Global realtime executor bitflag variable for spindle/coolant overrides.
 
-volatile uint8_t sys_sync_state;			// Global realtime executor bitflag variable for spindle synchronisation.
-volatile uint32_t sys_index_pulse_count;		// Global index pulse counter
-volatile uint32_t sys_synchronization_pulse_count;	// Global synchronization pulse counter
-volatile uint32_t sys_sync_Last_timer_tics;				// Time at last sync pulse
-volatile uint32_t sys_sync_timer_tics_passed;				// Time passed sync pulse
-volatile uint32_t sys_index_Last_timer_tics;				// Time at last index pulse
-volatile uint32_t sys_index_timer_tics_passed=0;	    	// Time passed index pulse
+//volatile uint8_t threading_sync_state;			// Global realtime executor bitflag variable for spindle synchronization.
+//volatile uint32_t threading_index_pulse_count;		// Global index pulse counter
+//volatile uint32_t threading_synchronization_pulse_count;	// Global synchronization pulse counter
+//volatile uint32_t threading_sync_Last_timer_tics;				// Time at last sync pulse
+//volatile uint32_t threading_sync_timer_tics_passed;				// Time passed sync pulse
+//volatile uint32_t threading_index_Last_timer_tics;				// Time at last index pulse
+//volatile uint32_t threading_index_timer_tics_passed=0;	    	// Time passed index pulse
+//volatile float threading_target_z_position;						// The Z-axis position to reach at the next synchronization pulse
+//volatile float threading_index_spindle_speed;					// The measured spindle speed used for threading
+//float threading_z_motion_per_sync_pulse;						// Distance the Z-axis has to travel at each synchronization pulse
 
 #ifdef DEBUG
   volatile uint8_t sys_rt_exec_debug;
@@ -93,8 +96,8 @@ int main(void)
     sys_rt_exec_motion_override = 0;
     sys_rt_exec_accessory_override = 0;
 	
-	sys_index_pulse_count=0;
-	sys_synchronization_pulse_count=0;
+	threading_index_pulse_count=0;
+	threading_synchronization_pulse_count=0;
 
     // Reset Grbl primary systems.
     serial_reset_read_buffer(); // Clear serial read buffer

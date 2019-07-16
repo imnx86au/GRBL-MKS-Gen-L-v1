@@ -150,19 +150,24 @@ extern system_t sys;
 extern int32_t sys_position[N_AXIS];      // Real-time machine (aka home) position vector in steps.
 extern int32_t sys_probe_position[N_AXIS]; // Last probe position in machine coordinates and steps.
 
-extern volatile uint8_t sys_sync_state;						// Global realtime executor bitflag variable for spindle synchronisation.
-extern volatile uint32_t sys_synchronization_pulse_count;	// Global synchronization pulse counter
-extern volatile uint32_t sys_sync_Last_timer_tics;				// Time at last index pulse
-extern volatile uint32_t sys_sync_timer_tics_passed;				// Time passed index pulse
-extern volatile uint32_t sys_index_pulse_count;				// Global index pulse counter
-extern volatile uint32_t sys_index_Last_timer_tics;				// Time at last index pulse
-extern volatile uint32_t sys_index_timer_tics_passed;				// Time passed index pulse
+//extern volatile uint8_t threading_sync_state;							// Global real time executor bitflag variable for spindle synchronization.
+//extern volatile uint32_t threading_synchronization_pulse_count;			// Global synchronization pulse counter
+//extern volatile uint32_t threading_sync_Last_timer_tics;				// Time at last sync pulse
+//extern volatile uint32_t threading_sync_timer_tics_passed;				// Time passed sync pulse
+//extern volatile float threading_sync_spindle_speed;						// The spindle speed calculated from the sync index pulses. Used for synchronizing the Z-axis.
+//extern volatile uint32_t threading_index_pulse_count;					// Global index pulse counter
+//extern volatile uint32_t threading_index_Last_timer_tics;				// Time at last index pulse
+//extern volatile uint32_t threading_index_timer_tics_passed;				// Time passed index pulse
+//extern volatile float threading_index_spindle_speed;					// The spindle speed calculated from the spindle index pulses. Used for displaying the real spindle speed.
+//extern volatile float threading_target_z_position;						// The Z-axis postion to reach at the next synchronization pulse
+//extern float threading_z_motion_per_sync_pulse;						    // Z-axis motion at each sync pulse. Is not declared as volatile because it is not updated by an ISR routine.
 
 extern volatile uint8_t sys_probe_state;		// Probing state value.  Used to coordinate the probing cycle with stepper ISR.
 extern volatile uint8_t sys_rt_exec_state;		// Global realtime executor bitflag variable for state management. See EXEC bitmasks.
 extern volatile uint8_t sys_rt_exec_alarm;		// Global realtime executor bitflag variable for setting various alarms.
 extern volatile uint8_t sys_rt_exec_motion_override; // Global realtime executor bitflag variable for motion-based overrides.
 extern volatile uint8_t sys_rt_exec_accessory_override; // Global realtime executor bitflag variable for spindle/coolant overrides.
+
 
 #ifdef DEBUG
   #define EXEC_DEBUG_REPORT  bit(0)

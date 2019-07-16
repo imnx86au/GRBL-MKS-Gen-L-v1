@@ -71,8 +71,8 @@ ISR(CONTROL_INT_vect)
       bit_true(sys_rt_exec_state, EXEC_FEED_HOLD); 
     } else if (bit_istrue(pin,CONTROL_PIN_INDEX_SAFETY_DOOR)) {
       bit_true(sys_rt_exec_state, EXEC_SAFETY_DOOR);
-	} else if (bit_istrue(pin,CONTROL_PIN_INDEX_SPINDLE_SYNC)) {
-	 bit_true(sys_sync_state, EXEC_SPINDLE_SYNC);   } 
+	} else if (bit_istrue(pin,CONTROL_PIN_INDEX_SPINDLE_SYNC)) { //Detected a threading spindle sync pulse
+	 bit_true(threading_sync_state, EXEC_SPINDLE_SYNC);   }	
   }
 }
 

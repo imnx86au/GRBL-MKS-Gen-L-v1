@@ -169,19 +169,6 @@ uint8_t limits_get_state(uint8_t selected_pins) //
   #endif
 #else
 
-//This routine processes the spindle index pin hit by increasing the index pulse counter and calculating the time between pulses 
-//used by showing the actual spindle speed in the report
-//The not time critical processing should be handled by protocol_exec_rt_system()
-//This is signaled by the EXEC_SPINDLE_INDEX flag
-void process_spindle_index_pin_hit()
-{
-  sys_index_timer_tics_passed=get_timer_ticks()-sys_index_Last_timer_tics;
-  sys_index_Last_timer_tics+=sys_index_timer_tics_passed;
-  sys_index_pulse_count++;
-  sys.spindle_speed=15000000 / sys_index_timer_tics_passed;	//calculate the spindle speed  at this place reduces the CPU time because a GUI will update more frequently 
-  bit_true(sys_sync_state, EXEC_SPINDLE_INDEX);	//Signal the receive of a spindle index pulse
-}
-
 //This routine processes the limit pins change events. 
 //It is called when the limit pins change event is trigged eventually after a software debounce
 // Ignore limit switches if already in an alarm state or in-process of executing an alarm.
@@ -193,7 +180,7 @@ void process_limit_pin_change_event()
 {
    if (sys.state != STATE_ALARM) {
 	 if (!(sys_rt_exec_alarm)) {
-	   if (limits_get_state(LIMIT_PIN_MASK_Y_AXIS)) {	// This is the lathe version so Y-axis limit pin hits are spindle index pulses so handle them and do not reset
+	   if (limits_get_state(LIMIT_PIN_MASK_Y_AXIS)) {	// This is the lathe version so Y-axis limit pin hits are spindle index pulses so handle them and do not reset controller
 		   process_spindle_index_pin_hit();
        }
       else 

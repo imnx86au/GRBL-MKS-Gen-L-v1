@@ -31,7 +31,7 @@
 
 // Internal report utilities to reduce flash with repetitive tasks turned into functions.
 void report_util_setting_prefix(uint8_t n) { serial_write('$'); print_uint8_base10(n); serial_write('='); }
-static void report_util_line_feed() { printPgmString(PSTR("\r\n")); }
+void report_util_line_feed() { printPgmString(PSTR("\r\n")); }
 static void report_util_feedback_line_feed() { serial_write(']'); report_util_line_feed(); }
 static void report_util_gcode_modes_G() { printPgmString(PSTR(" G")); }
 static void report_util_gcode_modes_M() { printPgmString(PSTR(" M")); }
@@ -129,38 +129,6 @@ void report_alarm_message(uint8_t alarm_code)
   report_util_line_feed();
   delay_ms(500); // Force delay to ensure message clears serial write buffer.
 }
-
-// Prints synchronization state.
-void report_synchronization_state()
-{
-	printPgmString(PSTR("Si: "));
-	print_uint32_base10(sys_index_pulse_count);
-	printPgmString(PSTR("|Ss: "));
-	print_uint32_base10(sys_synchronization_pulse_count);
-	printPgmString(PSTR("|Sp: "));
-	print_uint32_base10(sys_sync_timer_tics_passed);
-	printPgmString(PSTR("|Ip: "));
-	print_uint32_base10(sys_index_timer_tics_passed);
-	//report_RPM_state();
-	report_util_line_feed();
-}
-//return the RPM based on the time between spindle index pulses
-uint32_t RPM()
-{
-uint32_t tmp;
-  ATOMIC_BLOCK(ATOMIC_RESTORESTATE){		// Avoid changing during calculations so store temporary
-    tmp = sys_index_timer_tics_passed;
-  }
-  //if (tmp < (uint32_t) 150000000)			// >> 1 RPM
-    //return  0;
-  return (uint32_t) 15000000  / (tmp);		//every tic is 4 us, in stead of multiplying the time passed, divide the 60.000.0000 (const 1 second) by 4
-}
-//// Prints RPM state when bit is set in report mask.
-//void report_RPM_state()
-//{
-	//printPgmString(PSTR("|RPM:"));
-	//print_uint32_base10(RPM());
-//}
 
 // Prints feedback messages. This serves as a centralized method to provide additional
 // user feedback for things that are not of the status/alarm message protocol. These are
@@ -564,7 +532,6 @@ void report_realtime_status()
     printPgmString(PSTR("|FS:"));
     printFloat_RateValue(st_get_realtime_rate());
     serial_write(',');
-    //printFloat(sys.spindle_speed,N_DECIMAL_RPMVALUE);
     printFloat(sys.spindle_speed,N_DECIMAL_RPMVALUE);
   #endif
 

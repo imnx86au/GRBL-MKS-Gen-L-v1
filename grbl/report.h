@@ -84,17 +84,15 @@
 #define MESSAGE_SPINDLE_RESTORE 10
 #define MESSAGE_SLEEP_MODE 11
 
+// Internal report utilities to reduce flash with repetitive tasks turned into functions.
+
+void report_util_line_feed();
+
 // Prints system status messages.
 void report_status_message(uint8_t status_code);
 
 // Prints system alarm messages.
 void report_alarm_message(uint8_t alarm_code);
-
-// Prints system synchronization state.
-void report_synchronization_state();
-
-//// Prints system RPM state.
-//void report_RPM_state();
 
 // Prints miscellaneous feedback messages.
 void report_feedback_message(uint8_t message_code);

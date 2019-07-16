@@ -38,7 +38,4 @@ void limits_go_home(uint8_t cycle_mask);
 // Check for soft limit violations
 void limits_soft_check(float *target);
 
-//Processes the detection of a spindle index pulse
-void process_spindle_index_pin_hit();
-
 #endif

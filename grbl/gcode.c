@@ -1049,11 +1049,14 @@ uint8_t gc_execute_line(char *line)
         mc_line(gc_block.values.xyz, pl_data);
       } else if (gc_state.modal.motion == MOTION_MODE_SPINDLE_SYNC) {
 		 protocol_buffer_synchronize(); // Sync and finish all remaining buffered motions before moving on.
-		 sys_index_pulse_count=0; //set the spindle index pulse count to 0
-		 while (sys_index_pulse_count<SPINDLE_INDEX_PULSES_BEFORE_START_G33){
+		 threading_index_pulse_count=0; //set the spindle index pulse count to 0
+		 threading_z_motion_per_sync_pulse=gc_block.values.k * (float) SPINDLE_SYNC_PULSES_PER_ROTATION;
+		 threading_target_z_position=sys_position[Y_AXIS]+threading_z_motion_per_sync_pulse;		//this is the starting target for the next synchronization pulse. Nothing is moving so no need for atomic copy
+		 while (threading_index_pulse_count<SPINDLE_INDEX_PULSES_BEFORE_START_G33){
 			protocol_exec_rt_system();		//process real time commands until the spindle has made enough revolutions, mybe this has to be removed to improve starting at the right position
 		 }
-		 pl_data->feed_rate=gc_block.values.k * sys.spindle_speed;		//set the spindle speed to start
+		 pl_data->feed_rate=gc_block.values.k * threading_index_spindle_speed;		//set the spindle speed to start
+		 pl_data->condition |= PL_COND_FLAG_NO_FEED_OVERRIDE;						//During threading (G33) not feed override because the spindle speed determines the feed rate
 		 //set the start z	 
          mc_line(gc_block.values.xyz, pl_data);	//execute the motion 
       } else if (gc_state.modal.motion == MOTION_MODE_SEEK) {
