@@ -62,9 +62,10 @@ done copy G1 to G33
 * Change G33 to set speed before starting
 * Change G33 to accept K parameter
 * Change G33 to reject F parameter 
-Change G33 to start using the right feedrate 
+* Change G33 to start using the right feedrate 
 Change to update G33 block feedrate at every index pulse
 Change to update G33 block feedrate at every sync pulse
+use the time keeper to set the spindle speed to zero when no more index pulses are recieved
 done i guesss 
 
 Example fschill

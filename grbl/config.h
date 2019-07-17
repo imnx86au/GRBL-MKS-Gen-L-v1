@@ -40,7 +40,7 @@
 #define LATHE
 //Define following lines to enable code for testing this lathe version
 #define LATHETEST1	
-#define SPINDLE_SYNC_PULSES_PER_ROTATION 4	
+#define SPINDLE_SYNC_PULSES_PER_ROTATION 1	
 #define SPINDLE_INDEX_PULSES_BEFORE_START_G33 3
 
 //Define the serial port to use, the mega2560 has four (USART0 .. USART3) uncomment just one

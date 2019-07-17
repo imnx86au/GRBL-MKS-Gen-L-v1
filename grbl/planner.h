@@ -61,7 +61,7 @@ typedef struct {
     uint8_t direction_bits;    // The direction bit set for this block (refers to *_DIRECTION_BIT in config.h)
   #endif // DEFAULTS_RAMPS_BOARD
   // Block condition data to ensure correct execution depending on states and overrides.
-  uint8_t condition;      // Block bitflag variable defining block run conditions. Copied from pl_line_data.
+  uint16_t condition;      // Block bitflag variable defining block run conditions. Copied from pl_line_data.
   int32_t line_number;  // Block line number for real-time reporting. Copied from pl_line_data.
 
   // Fields used by the motion planner to manage acceleration. Some of these values may be updated
@@ -88,7 +88,7 @@ typedef struct {
   float feed_rate;          // Desired feed rate for line motion. Value is ignored, if rapid motion.
   float spindle_speed;      // Desired spindle speed through line motion.
   int32_t line_number;    // Desired line number to report when executing.
-  uint8_t condition;        // Bitflag variable to indicate planner conditions. See defines above.
+  uint16_t condition;        // Bitflag variable to indicate planner conditions. See defines above.
 } plan_line_data_t;
 
 

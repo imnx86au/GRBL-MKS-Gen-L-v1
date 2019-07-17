@@ -57,12 +57,6 @@ void gc_sync_position()
   system_convert_array_steps_to_mpos(gc_state.position,sys_position);
 }
 
-//// Calculates the feed rate based on the spindle speed, and the target position at the next sync pulse
-//void gc_sync_spindle_speed(plan_line_data_t *pl_data,parser_block_t *gc_block)
-//{
-  //pl_data->feed_rate=gc_block.values.k*sys.spindle_speed;//*(float);//SPINDLE_SYNC_PULSES_PER_ROTATION;
-//}
-
 // Executes one line of 0-terminated G-Code. The line is assumed to contain only uppercase
 // characters and signed floating point values (no whitespace). Comments and block delete
 // characters have been removed. In this function, all units and positions are converted and
@@ -664,7 +658,7 @@ uint8_t gc_execute_line(char *line)
       switch (gc_block.modal.motion) {
         case MOTION_MODE_SPINDLE_SYNC:
 			if  bit_isfalse(value_words,bit(WORD_K)) { FAIL(STATUS_GCODE_VALUE_WORD_MISSING); }					// [K value not given]
-			else if  bit_istrue(value_words,bit(WORD_F)) { FAIL(STATUS_GCODE_UNUSED_WORDS); }					// [F value given]
+			else if  bit_istrue(value_words,bit(WORD_F)) { FAIL(STATUS_GCODE_UNUSED_WORDS); }					// [F value given, but not needed]
             else if (gc_block.modal.units == UNITS_MODE_INCHES) {gc_block.values.ijk[Z_AXIS] *= MM_PER_INCH;}	//calculate for inches
 			gc_block.values.k=gc_block.values.ijk[Z_AXIS];														//Set the feed per revolution in the (correct) k variable
             bit_false(value_words,bit(WORD_K));	//clear K word
@@ -1048,15 +1042,18 @@ uint8_t gc_execute_line(char *line)
       if (gc_state.modal.motion == MOTION_MODE_LINEAR) {
         mc_line(gc_block.values.xyz, pl_data);
       } else if (gc_state.modal.motion == MOTION_MODE_SPINDLE_SYNC) {
-		 protocol_buffer_synchronize(); // Sync and finish all remaining buffered motions before moving on.
-		 threading_index_pulse_count=0; //set the spindle index pulse count to 0
-		 threading_z_motion_per_sync_pulse=gc_block.values.k * (float) SPINDLE_SYNC_PULSES_PER_ROTATION;
-		 threading_target_z_position=sys_position[Y_AXIS]+threading_z_motion_per_sync_pulse;		//this is the starting target for the next synchronization pulse. Nothing is moving so no need for atomic copy
+		  //timekeeper_reset();					//reset the timer and use the timer overflow count to check for timeouts
+		  //threading_index_spindle_speed=0;		//Set the speed to 0 just in case, should not be necessarily
+		 protocol_buffer_synchronize();			// Sync and finish all remaining buffered motions before moving on.
+		 threading_index_pulse_count=0;			//set the spindle index pulse count to 0
+		 threading_z_feed_rate_factor= gc_block.values.k;	//Dividing the time between sync pulses by this factor is the requested feedrate.
+		 //threading_target_z_position=sys_position[Y_AXIS]+threading_z_motion_per_sync_pulse;		//this is the starting target for the next synchronization pulse. Nothing is moving so no need for atomic copy
 		 while (threading_index_pulse_count<SPINDLE_INDEX_PULSES_BEFORE_START_G33){
 			protocol_exec_rt_system();		//process real time commands until the spindle has made enough revolutions, mybe this has to be removed to improve starting at the right position
 		 }
 		 pl_data->feed_rate=gc_block.values.k * threading_index_spindle_speed;		//set the spindle speed to start
-		 pl_data->condition |= PL_COND_FLAG_NO_FEED_OVERRIDE;						//During threading (G33) not feed override because the spindle speed determines the feed rate
+		 //pl_data->condition |= PL_COND_FLAG_NO_FEED_OVERRIDE;						//During threading (G33) no feed override because the spindle speed determines the feed rate
+		 pl_data->condition |= PL_COND_FLAG_FEED_PER_REV;							//Set condition to signal feed rate per revolution mode (G33) to allow updating the feedrate at every index or sync pulse
 		 //set the start z	 
          mc_line(gc_block.values.xyz, pl_data);	//execute the motion 
       } else if (gc_state.modal.motion == MOTION_MODE_SEEK) {
