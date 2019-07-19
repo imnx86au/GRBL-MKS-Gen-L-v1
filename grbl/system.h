@@ -138,7 +138,6 @@ typedef struct {
   uint8_t spindle_stop_ovr;    // Tracks spindle stop override states
   uint8_t report_ovr_counter;  // Tracks when to add override data to status reports.
   uint8_t report_wco_counter;  // Tracks when to add work coordinate offset data to status reports.
-  uint8_t report_synchronization_counter;  // Tracks when to report the synchronization state.
   #ifdef ENABLE_PARKING_OVERRIDE_CONTROL
     uint8_t override_ctrl;     // Tracks override control states.
   #endif

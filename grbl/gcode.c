@@ -1044,16 +1044,13 @@ uint8_t gc_execute_line(char *line)
       } else if (gc_state.modal.motion == MOTION_MODE_SPINDLE_SYNC) {
 		 protocol_buffer_synchronize();			// Sync and finish all remaining buffered motions before moving on.
 		 threading_init(gc_block.values.k);		//initialize a threading pass, all counters are cleared
-		 //pl_data->condition |= PL_COND_FLAG_NO_FEED_OVERRIDE;										//During threading (G33) no feed override because the spindle speed determines the feed rate
-		 pl_data->condition |= PL_COND_FLAG_FEED_PER_REV;											//Set condition to signal feed rate per revolution mode (G33) to allow updating the feedrate at every index or sync pulse
+		 //pl_data->condition ;										
+		 pl_data->condition |= PL_COND_FLAG_FEED_PER_REV | PL_COND_FLAG_NO_FEED_OVERRIDE;	//During threading (G33) no feed override. Set condition to allow updating the feed rate at every sync pulse
 		 while (threading_index_pulse_count<SPINDLE_INDEX_PULSES_BEFORE_START_G33){
 			protocol_exec_rt_system();		//process real time commands until the spindle has made enough revolutions, mybe this has to be removed to improve starting at the right position
 		 }
 		 threading_reset();	//reset to undo counting and processing of the previous 4 index pulses
 		 pl_data->feed_rate=gc_block.values.k * threading_index_spindle_speed;		//set the start feed rate 
-		 //ReportMessagef("Pc:",gc_state.position[Z_AXIS]);			//report the Z-axis position error at every index pulse
-		 //ReportMessagef("Pt:",gc_block.values.xyz[Z_AXIS]);			//report the Z-axis position error at every index pulse
-		//report_util_line_feed();
          mc_line(gc_block.values.xyz, pl_data);	//execute the motion 
       } else if (gc_state.modal.motion == MOTION_MODE_SEEK) {
         pl_data->condition |= PL_COND_FLAG_RAPID_MOTION; // Set rapid motion condition flag.

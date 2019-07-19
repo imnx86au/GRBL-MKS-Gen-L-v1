@@ -446,7 +446,7 @@
 // available RAM, like when re-compiling for a Mega or Sanguino. Or decrease if the Arduino
 // begins to crash due to the lack of available RAM or if the CPU is having trouble keeping
 // up with planning new incoming motions as they are executed. 
-// #define BLOCK_BUFFER_SIZE 25  // Uncomment to override default in planner.h.
+ #define BLOCK_BUFFER_SIZE 25  // Uncomment to override default in planner.h.
 
 // Governs the size of the intermediary step segment buffer between the step execution algorithm
 // and the planner blocks. Each segment is set of steps executed at a constant velocity over a
@@ -464,7 +464,7 @@
 // can be too small and g-code blocks can get truncated. Officially, the g-code standards
 // support up to 256 characters. In future versions, this default will be increased, when
 // we know how much extra memory space we can re-invest into this.
-// #define LINE_BUFFER_SIZE 256  // Uncomment to override default in protocol.h
+ //#define LINE_BUFFER_SIZE 128 // Uncomment to override default in protocol.h
   
 // Serial send and receive buffer size. The receive buffer is often used as another streaming
 // buffer to store incoming blocks to be processed by Grbl when its ready. Most streaming

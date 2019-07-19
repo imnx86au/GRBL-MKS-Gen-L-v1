@@ -253,21 +253,6 @@ uint8_t plan_check_full_buffer()
   return(false);
 }
 
-
-////// Computes and returns block nominal speed based on running condition and override values.
-////// NOTE: All system motion commands, such as homing/parking, are not subject to overrides.
-////float plan_compute_profile_nominal_speed(plan_block_t *block)
-////{
-  ////float nominal_speed = block->programmed_rate;
-  ////if (block->condition & PL_COND_FLAG_RAPID_MOTION) { nominal_speed *= (0.01*sys.r_override); }
-  ////else {
-    ////if (!(block->condition & PL_COND_FLAG_NO_FEED_OVERRIDE)) { nominal_speed *= (0.01*sys.f_override); }
-    ////if (nominal_speed > block->rapid_rate) { nominal_speed = block->rapid_rate; }
-  ////}
-  ////if (nominal_speed > MINIMUM_FEED_RATE) { return(nominal_speed); }
-  ////return(MINIMUM_FEED_RATE);
-////}
-
 // Computes and returns block nominal speed based on running condition and override values.
 // NOTE: All system motion commands, such as homing/parking, are not subject to overrides.
 float plan_compute_profile_nominal_speed(plan_block_t *block)
@@ -276,19 +261,14 @@ float plan_compute_profile_nominal_speed(plan_block_t *block)
 	if (block->condition & PL_COND_FLAG_RAPID_MOTION) { nominal_speed *= (0.01*sys.r_override); }
 	else
 	if (block->condition & PL_COND_FLAG_FEED_PER_REV) { // SPINDLE_SYNC
-		if (Threading_Synchronize==true) { //calculate the position error if a sync pulse was detected
-		  threading_millimeters=block->millimeters;
-		  threading_millimeters_error=block->millimeters-threading_millimeters_target;
-		  block->programmed_rate*=(float)1+(threading_millimeters_error/threading_mm_per_synchronization_pulse);	//recalculate the feed rate to reduce the error
-		  threading_feed_rate= block->programmed_rate;
+		if (Threading_Synchronize==true) {																			// calculate the feed rate to be at the right position at the next spindle pulse	
 		  Threading_Synchronize=false;
-		//// adjust the feed rate to minimize the motion error
-		//nominal_speed = block->programmed_rate * block->spindle_speed;
-		////// check if resulting speed exceeds machine capability
-		////// this is also a safety feature when forgetting to issue G94 after G95, and commanding a very large feed due to it.
-		////if (nominal_speed > block->rapid_rate) {
-			////system_set_exec_state_flag(EXEC_FEED_HOLD); // hold feed if going too fast.
-		////}
+		  //threading_millimeters=block->millimeters;																	// save the traveled distance for use in other places
+		  threading_millimeters_error=threading_millimeters_target-block->millimeters;								// calculate the position error. Note that block->millimeters counts down This has to be compensated at the next spindle pulse
+		  //distance_to_travel=threading_mm_per_synchronization_pulse-threading_millimeters_error;					// calculate the distance to travel at the next sync pulse
+		  //time_to_travel=  (float) threading_index_timer_tics_passed / (float) 15000000 ;								// the duration between synchronization pulse in minutes
+		  block->programmed_rate=(threading_mm_per_synchronization_pulse-threading_millimeters_error) / ((float) threading_index_timer_tics_passed / (float) 15000000);												// calculate the feed rate to reduce the error
+		  //threading_feed_rate= block->programmed_rate;																// save the feed rate for use in other places
 		  }
 		} else {
 		if (!(block->condition & PL_COND_FLAG_NO_FEED_OVERRIDE)) { nominal_speed *= (0.01*sys.f_override); }

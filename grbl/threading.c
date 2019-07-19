@@ -102,10 +102,11 @@ void threading_reset()
 void process_spindle_index_pin_hit()
 {
 	//first the time critical stuff is done to minimize the delay between the pulse detection and synchronizing feed rate
-	if (SPINDLE_SYNC_PULSES_PER_ROTATION==1)  //update the feed rate here when there is only one synchronization pulse /  rotation
-	  update_planner_feed_rate();	
-	//then the less time critical stuff is done  
 	threading_index_timer_tics_passed=get_timer_ticks()-threading_index_Last_timer_tics;
+	if (SPINDLE_SYNC_PULSES_PER_ROTATION==1) {  //update the feed rate here when there is only one synchronization pulse /  rotation
+	  update_planner_feed_rate();	
+	 }
+	//then the less time critical stuff is done  
 	threading_index_Last_timer_tics+=threading_index_timer_tics_passed;  //adjust for calculating the next time
 	threading_index_pulse_count++;		
 	//calculate the spindle speed  at this place (not in the report) reduces the CPU time because a GUI will update more frequently
@@ -124,9 +125,9 @@ void process_spindle_index_pin_hit()
 // Recalculates the feed rates for all the blocks in the planner as if a new block was added to the planner que
 void update_planner_feed_rate() {
 	ATOMIC_BLOCK(ATOMIC_RESTORESTATE){
-		threading_millimeters_target-=threading_mm_per_synchronization_pulse;	//Calculate the new target
-		Threading_Synchronize=true;												//Signal the planner to update
-		}
+	  threading_millimeters_target-=threading_mm_per_synchronization_pulse;	//Calculate the new target
+	  Threading_Synchronize=true;											//Signal the planner to update
+	}
 	plan_update_velocity_profile_parameters();//Update the planner
 	plan_cycle_reinitialize();
 }
@@ -137,20 +138,21 @@ void report_synchronization_state()
 	plan_block_t *plan = plan_get_current_block();
 	if ((plan!=NULL) && (plan->condition & PL_COND_FLAG_FEED_PER_REV)) { //update only during threading
 	    //printPgmString(PSTR("Si: "));
-    	//print_uint32_base10(threading_index_pulse_count);
-    	//printPgmString(PSTR("|Ss: "));
-    	//print_uint32_base10(threading_synchronization_pulse_count);
-    	//printPgmString(PSTR("|Sp: "));
-    	//print_uint32_base10(threading_sync_timer_tics_passed);
-    	//printPgmString(PSTR("|Ip: "));
-    	//print_uint32_base10(threading_index_timer_tics_passed);
-    	//report_RPM_state();
-    	//ReportMessagef("  Zt:",threading_position_change_target);	//report the Z-axis position error at every index pulse
-    	//ReportMessagef("  Zc:",threading_position_change);			//report the Z-axis position error at every index pulse
-	  ReportMessagef("  Tp:",threading_millimeters);					//report the threading position 
-	  ReportMessagef("  Tt:",threading_millimeters_target);			//report the threading position target
+    	////print_uint32_base10(threading_index_pulse_count);
+    	////printPgmString(PSTR("|Ss: "));
+    	////print_uint32_base10(threading_synchronization_pulse_count);
+    	////printPgmString(PSTR("|Sp: "));
+    	////print_uint32_base10(threading_sync_timer_tics_passed);
+    	////printPgmString(PSTR("|Ip: "));
+    	////print_uint32_base10(threading_index_timer_tics_passed);
+    	////report_RPM_state();
+    	////ReportMessagef("  Zt:",threading_position_change_target);	//report the Z-axis position error at every index pulse
+    	////ReportMessagef("  Zc:",threading_position_change);			//report the Z-axis position error at every index pulse
+	  ////ReportMessagef("  Tp:",threading_millimeters);					//report the threading position 
+	  ////ReportMessagef("  Tt:",threading_millimeters_target);			//report the threading position target
 	  ReportMessagef("  Te:",threading_millimeters_error);				//report the threading position error
-	  ReportMessagef("  Tf:",threading_feed_rate);				//report the threading position error
+	  ///ReportMessagef("  Tf:",threading_feed_rate);				//report the threading position error
+	  //printFloat(threading_millimeters_error,2);
 	  report_util_line_feed();
 	}
 }

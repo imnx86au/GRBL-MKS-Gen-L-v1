@@ -245,12 +245,12 @@ void protocol_exec_rt_system()
   #ifdef LATHE
   //processing spindle pulse and spindle synchronization pulse
   rt_exec = threading_sync_state;	//save the volatile value
-  if (bit_istrue(rt_exec,EXEC_SPINDLE_SYNC)){
-	  threading_sync_timer_tics_passed=get_timer_ticks()-threading_sync_Last_timer_tics;
-	  threading_sync_Last_timer_tics+=threading_sync_timer_tics_passed;
-	  threading_synchronization_pulse_count++;
-	  bit_false(threading_sync_state,EXEC_SPINDLE_SYNC);
-    }
+  //if (bit_istrue(rt_exec,EXEC_SPINDLE_SYNC)){
+	  ////threading_sync_timer_tics_passed=get_timer_ticks()-threading_sync_Last_timer_tics;
+	  ////threading_sync_Last_timer_tics+=threading_sync_timer_tics_passed;
+	  ////threading_synchronization_pulse_count++;
+	  //bit_false(threading_sync_state,EXEC_SPINDLE_SYNC);
+    //}
    if (bit_istrue(rt_exec,EXEC_SPINDLE_INDEX)){
 	  //report_RPM_state();
 	  //if (bit_istrue(settings.status_report_mask,BITFLAG_REPORT_SYNC_STATE)) 	//report on every index pulse
