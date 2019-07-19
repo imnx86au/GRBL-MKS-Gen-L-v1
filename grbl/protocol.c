@@ -253,7 +253,7 @@ void protocol_exec_rt_system()
     }
    if (bit_istrue(rt_exec,EXEC_SPINDLE_INDEX)){
 	  //report_RPM_state();
-	  if (bit_istrue(settings.status_report_mask,BITFLAG_REPORT_SYNC_STATE)) 	//report on every index pulse
+	  //if (bit_istrue(settings.status_report_mask,BITFLAG_REPORT_SYNC_STATE)) 	//report on every index pulse
 		  report_synchronization_state();
 	 bit_false(threading_sync_state,EXEC_SPINDLE_INDEX);
 	  }

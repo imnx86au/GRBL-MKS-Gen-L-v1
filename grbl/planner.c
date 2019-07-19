@@ -254,18 +254,45 @@ uint8_t plan_check_full_buffer()
 }
 
 
+////// Computes and returns block nominal speed based on running condition and override values.
+////// NOTE: All system motion commands, such as homing/parking, are not subject to overrides.
+////float plan_compute_profile_nominal_speed(plan_block_t *block)
+////{
+  ////float nominal_speed = block->programmed_rate;
+  ////if (block->condition & PL_COND_FLAG_RAPID_MOTION) { nominal_speed *= (0.01*sys.r_override); }
+  ////else {
+    ////if (!(block->condition & PL_COND_FLAG_NO_FEED_OVERRIDE)) { nominal_speed *= (0.01*sys.f_override); }
+    ////if (nominal_speed > block->rapid_rate) { nominal_speed = block->rapid_rate; }
+  ////}
+  ////if (nominal_speed > MINIMUM_FEED_RATE) { return(nominal_speed); }
+  ////return(MINIMUM_FEED_RATE);
+////}
+
 // Computes and returns block nominal speed based on running condition and override values.
 // NOTE: All system motion commands, such as homing/parking, are not subject to overrides.
 float plan_compute_profile_nominal_speed(plan_block_t *block)
 {
-  float nominal_speed = block->programmed_rate;
-  if (block->condition & PL_COND_FLAG_RAPID_MOTION) { nominal_speed *= (0.01*sys.r_override); }
-  else {
-    if (!(block->condition & PL_COND_FLAG_NO_FEED_OVERRIDE)) { nominal_speed *= (0.01*sys.f_override); }
-    if (nominal_speed > block->rapid_rate) { nominal_speed = block->rapid_rate; }
-  }
-  if (nominal_speed > MINIMUM_FEED_RATE) { return(nominal_speed); }
-  return(MINIMUM_FEED_RATE);
+	float nominal_speed = block->programmed_rate;
+	if (block->condition & PL_COND_FLAG_RAPID_MOTION) { nominal_speed *= (0.01*sys.r_override); }
+	else
+	if (block->condition & PL_COND_FLAG_FEED_PER_REV) { // SPINDLE_SYNC
+		if (Threading_Synchronize==true) { //calculate the position error if a sync pulse was detected
+		  threading_position_error=block->millimeters-threading_millimeters_target;
+		  Threading_Synchronize=false;
+		//// adjust the feed rate to minimize the motion error
+		//nominal_speed = block->programmed_rate * block->spindle_speed;
+		////// check if resulting speed exceeds machine capability
+		////// this is also a safety feature when forgetting to issue G94 after G95, and commanding a very large feed due to it.
+		////if (nominal_speed > block->rapid_rate) {
+			////system_set_exec_state_flag(EXEC_FEED_HOLD); // hold feed if going too fast.
+		////}
+		  }
+		} else {
+		if (!(block->condition & PL_COND_FLAG_NO_FEED_OVERRIDE)) { nominal_speed *= (0.01*sys.f_override); }
+		if (nominal_speed > block->rapid_rate) { nominal_speed = block->rapid_rate; }
+	}
+	if (nominal_speed > MINIMUM_FEED_RATE) { return(nominal_speed); }
+	return(MINIMUM_FEED_RATE);
 }
 
 
@@ -467,6 +494,11 @@ uint8_t plan_buffer_line(float *target, plan_line_data_t *pl_data)
 
     // Finish up by recalculating the plan with the new block.
     planner_recalculate();
+  }
+  //In feed per revolution mode set the global threading mm value. This value is defined global to save memory
+  if ((block->condition & PL_COND_FLAG_FEED_PER_REV)) {
+	  	Threading_Synchronize=false;						//set the update to false so synchronization starts at the next synchronization pulse
+		threading_millimeters_target=block->millimeters;
   }
   return(PLAN_OK);
 }

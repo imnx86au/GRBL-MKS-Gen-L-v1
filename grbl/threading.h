@@ -30,11 +30,18 @@ extern volatile uint32_t threading_index_pulse_count;					// Global index pulse 
 extern volatile uint32_t threading_index_Last_timer_tics;				// Time at last index pulse
 extern volatile uint32_t threading_index_timer_tics_passed;				// Time passed index pulse
 extern volatile float threading_index_spindle_speed;					// The spindle speed calculated from the spindle index pulses. Used for displaying the real spindle speed.
-extern volatile float threading_target_z_position;						// The Z-axis postion to reach at the next synchronization pulse
-extern float threading_z_feed_rate_factor;						    // Z-axis motion at each sync pulse. Is not declared as volatile because it is not updated by an ISR routine.
+extern volatile float threading_position_change_target;					// The Z-axis postion to reach at the next synchronization pulse
+extern volatile float threading_position_error;						    // The Z-axis position error calculated at every synchronization pulsee
+extern volatile float threading_millimeters_target;							// The Z-axis travel used for calculating the threading errro
+extern float threading_mm_per_synchronization_pulse;								// Z-axis motion at each sync pulse. Is not declared as volatile because it is not updated by an ISR routine.
+extern float threading_get_z_position_change();
+extern volatile bool Threading_Synchronize;
 
-void process_spindle_index_pin_hit();
-void update_planner_feed_rate(float  feed_rate);
+extern void threading_init(float K_value);								//initializes the G33 threading pass using the K value set in the gcode
 void report_synchronization_state();
-//uint32_t RPM();
+//void threading_get_start_position_z();
+//void threading_calculate_target_position();
+void process_spindle_index_pin_hit();
+void update_planner_feed_rate();
+void threading_reset();
 #endif
