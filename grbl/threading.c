@@ -27,12 +27,12 @@ volatile uint32_t threading_sync_Last_timer_tics;				// Time at last sync pulse
 volatile uint32_t threading_sync_timer_tics_passed;				// Time passed sync pulse
 volatile uint32_t threading_index_Last_timer_tics;				// Time at last index pulse
 volatile uint32_t threading_index_timer_tics_passed=0;	    	// Time passed index pulse
-volatile float threading_millimeters_target;									// The Z-axis travel used for calculating the threading errro
-volatile float threading_position_error;						// The Z-axis position error calculated at every synchronization pulsee
-volatile float threading_position_change;						// The Z-axis position to reach at the next synchronization pulse
-volatile float threading_position_change_target;				// The Z-axis position to reach at the next synchronization pulse
 volatile float threading_index_spindle_speed;					// The measured spindle speed used for threading
 float threading_mm_per_synchronization_pulse;					// The factor to calculate the feed rate from the spindle speed
+volatile float threading_millimeters;							// The threading feed as reported by the planner
+volatile float threading_millimeters_target;						// The threading feed target as reported by the planner
+volatile float threading_millimeters_error;						// The threading feed error calculated at every synchronization pulsee
+volatile float threading_feed_rate;								// The threading feed rate as reported by the planner
 int32_t threading_start_position_steps;							// The start position in steps used to calculate the 
 volatile bool Threading_Synchronize;
 
@@ -91,7 +91,7 @@ void threading_init(float K_value)
 void threading_reset()
 {
 	Threading_Synchronize=false;
-	threading_position_change_target=0;																	//This is a relative position, so set at zero
+	//threading_position_change_target=0;																	//This is a relative position, so set at zero
 	threading_millimeters_target=0;																			//Set this value to 0, will be update at the start of the planner block
 }
 // This routine processes the spindle index pin hit by increasing the index pulse counter and calculating the time between pulses
@@ -147,9 +147,10 @@ void report_synchronization_state()
     	//report_RPM_state();
     	//ReportMessagef("  Zt:",threading_position_change_target);	//report the Z-axis position error at every index pulse
     	//ReportMessagef("  Zc:",threading_position_change);			//report the Z-axis position error at every index pulse
-	  ReportMessagef("  Tm:",threading_millimeters_target);			//report the Z-axis position error at every index pulse
-	  //ReportMessagef("  Zs:",threading_position_change);	//report the Z-axis position error at every index pulse
-	  ReportMessagef("  Te:",threading_position_error);				//report the threading position error at every index pulse
+	  ReportMessagef("  Tp:",threading_millimeters);					//report the threading position 
+	  ReportMessagef("  Tt:",threading_millimeters_target);			//report the threading position target
+	  ReportMessagef("  Te:",threading_millimeters_error);				//report the threading position error
+	  ReportMessagef("  Tf:",threading_feed_rate);				//report the threading position error
 	  report_util_line_feed();
 	}
 }

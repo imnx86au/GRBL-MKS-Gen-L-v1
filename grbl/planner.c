@@ -277,7 +277,10 @@ float plan_compute_profile_nominal_speed(plan_block_t *block)
 	else
 	if (block->condition & PL_COND_FLAG_FEED_PER_REV) { // SPINDLE_SYNC
 		if (Threading_Synchronize==true) { //calculate the position error if a sync pulse was detected
-		  threading_position_error=block->millimeters-threading_millimeters_target;
+		  threading_millimeters=block->millimeters;
+		  threading_millimeters_error=block->millimeters-threading_millimeters_target;
+		  block->programmed_rate*=(float)1+(threading_millimeters_error/threading_mm_per_synchronization_pulse);	//recalculate the feed rate to reduce the error
+		  threading_feed_rate= block->programmed_rate;
 		  Threading_Synchronize=false;
 		//// adjust the feed rate to minimize the motion error
 		//nominal_speed = block->programmed_rate * block->spindle_speed;
