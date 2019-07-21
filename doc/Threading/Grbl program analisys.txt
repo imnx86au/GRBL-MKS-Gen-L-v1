@@ -51,9 +51,15 @@ Gcode.C
 This is where the normal (not real time) Gcode commands are analyzed 
 
 Motion_control.c mc_line()
-This is where absolute liniair motions are added to the planner. G33 can start after the planner buffer is empty, there are 4 spindle sync pulses and the inital speed is set.
+This is where absolute liniair motions are added to the planner. G33 can start after the planner buffer is empty, there are 3 spindle index pulses and the inital speed is set.
+If there are also spindle synchronization pulses (SPINDLE_SYNC_PULSES_PER_REVOLUTION > 1), waiting for the next synchronization pulse has to be done. It is a requirement that the spindle synchronization pulse, 
+followes the index pulse by some distance to avoid just missing the synchronizaton pulse. It is best to place the spindle index pulse in the mid of 2 synchronization pulses.
 Here we have to change the routine!
 
+Protocol.c protocol_exec_rt_system()
+This is where all not event driven code has to be executed. All event (interrupt) driven code has to signal protocol_exec_rt_system() to do some thing.
+This means the interrupt handler should be as lean as possible and don't execute code than can be executed outside the event handler.
+Example: PCINT2 handles the Spindle Index pulse by calling process_limit_pin_change_event() who sets bit EXEC_SPINDLE_INDEX_PULSE in threading_exec_flags to signalling protocol_exec_rt_system() to handle it.
 
 Implement G33 Gcode
 done copy G1 to G33

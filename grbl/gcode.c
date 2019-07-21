@@ -1049,6 +1049,12 @@ uint8_t gc_execute_line(char *line)
 		 while (threading_index_pulse_count<SPINDLE_INDEX_PULSES_BEFORE_START_G33){
 			protocol_exec_rt_system();		//process real time commands until the spindle has made enough revolutions, maybe this has to be removed to improve starting at the right position
 		 }
+		 if (SPINDLE_SYNC_PULSES_PER_ROTATION!=1) {		//Index pulse only need to start synchronization, waiting for the next synchronization pulse
+		   threading_sync_pulse_count=0;
+		   while (threading_sync_pulse_count==0){
+			 protocol_exec_rt_system();		         //process real time commands until the spindle has made enough revolutions, maybe this has to be removed to improve starting at the right position
+		    }
+		 }
 		 threading_reset();	//reset to undo counting and processing of the previous 4 index pulses
 		 pl_data->feed_rate=gc_block.values.k * threading_index_spindle_speed;		//set the start feed rate 
          mc_line(gc_block.values.xyz, pl_data);	//execute the motion 
