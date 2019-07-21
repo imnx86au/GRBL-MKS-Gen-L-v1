@@ -76,7 +76,7 @@ void process_spindle_index_pulse()
 	threading_index_Last_timer_tics+=threading_index_timer_tics_passed;						// adjust for calculating the next time
 	threading_index_pulse_count++;															// Increase the pulse count
 	threading_index_spindle_speed = 15000000 / threading_index_timer_tics_passed;			// calculate the spindle speed  at this place (not in the report) reduces the CPU time because a GUI will update more frequently
-	sys.spindle_speed=threading_index_spindle_speed;										// Show the real spindle speed
+	//sys.spindle_speed=threading_index_spindle_speed;										// Show the real spindle speed
 	if (SPINDLE_SYNC_PULSES_PER_ROTATION==1)
 	{
 		threading_sync_timer_tics_passed=threading_index_timer_tics_passed;					//set the synchronization timer tics passed

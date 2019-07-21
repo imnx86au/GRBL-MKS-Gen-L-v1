@@ -532,7 +532,8 @@ void report_realtime_status()
     printPgmString(PSTR("|FS:"));
     printFloat_RateValue(st_get_realtime_rate());
     serial_write(',');
-    printFloat(sys.spindle_speed,N_DECIMAL_RPMVALUE);
+    //printFloat(sys.spindle_speed,N_DECIMAL_RPMVALUE);
+    printFloat(threading_index_spindle_speed,0);
   #endif
 
   #ifdef REPORT_FIELD_PIN_STATE

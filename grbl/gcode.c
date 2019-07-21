@@ -1044,7 +1044,7 @@ uint8_t gc_execute_line(char *line)
       } else if (gc_state.modal.motion == MOTION_MODE_SPINDLE_SYNC) {
 		 protocol_buffer_synchronize();			// Sync and finish all remaining buffered motions before moving on.
 		 threading_init(gc_block.values.k);		//initialize a threading pass, all counters are cleared
-		 //pl_data->condition ;										
+		 //pl_data->condition ;		
 		 pl_data->condition |= PL_COND_FLAG_FEED_PER_REV | PL_COND_FLAG_NO_FEED_OVERRIDE;	//During threading (G33) no feed override. Set condition to allow updating the feed rate at every sync pulse
 		 while (threading_index_pulse_count<SPINDLE_INDEX_PULSES_BEFORE_START_G33){
 			protocol_exec_rt_system();		//process real time commands until the spindle has made enough revolutions, maybe this has to be removed to improve starting at the right position
