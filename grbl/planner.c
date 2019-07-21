@@ -261,13 +261,12 @@ float plan_compute_profile_nominal_speed(plan_block_t *block)
 	if (block->condition & PL_COND_FLAG_RAPID_MOTION) { nominal_speed *= (0.01*sys.r_override); }
 	else
 	if (block->condition & PL_COND_FLAG_FEED_PER_REV) { // SPINDLE_SYNC
-		if bit_istrue(threading_exec_flags, EXEC_PLANNER_SYNC_PULSE) {										// there was a synchronization pulse so calculate the feed rate to be at the right position at the next spindle pulse	
+		if bit_istrue(threading_exec_flags, EXEC_PLANNER_SYNC_PULSE) {											// there was a synchronization pulse so calculate the feed rate to be at the right position at the next spindle pulse	
 		  system_clear_threading_exec_flag(EXEC_PLANNER_SYNC_PULSE);											// clear the bit to avoid processing again
-		  threading_millimeters_target-=threading_mm_per_synchronization_pulse;							// calculate the new target					
-		  threading_millimeters_error=threading_millimeters_target-block->millimeters;					// calculate the position error. Note that block->millimeters counts down This has to be compensated at the next spindle pulse
-		  block->spindle_speed=((float) threading_index_timer_tics_passed / (float) 15000000);
-		  block->programmed_rate=(threading_mm_per_synchronization_pulse-threading_millimeters_error) / ((float) threading_index_timer_tics_passed / (float) 15000000);		//calculate the new feed rate										// calculate the feed rate to reduce the error
-		  //threading_feed_rate= block->programmed_rate;												// save the feed rate for use in other places
+		  threading_millimeters_target-=threading_mm_per_synchronization_pulse;									// calculate the new target					
+		  threading_millimeters_error=threading_millimeters_target-block->millimeters;							// calculate the position error. Note that block->millimeters counts down This has to be compensated at the next spindle pulse
+		  block->spindle_speed=(float) threading_sync_timer_tics_passed / ((float) 15000000  * (float) SPINDLE_SYNC_PULSES_PER_ROTATION);	//Calculate the spindle speed
+		  block->programmed_rate=(threading_mm_per_synchronization_pulse-threading_millimeters_error) / block->spindle_speed;				//calculate the feed rate to reduce the error
 		  }
 		} else {
 		if (!(block->condition & PL_COND_FLAG_NO_FEED_OVERRIDE)) { nominal_speed *= (0.01*sys.f_override); }

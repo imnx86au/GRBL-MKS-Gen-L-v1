@@ -22,14 +22,13 @@
 #define threading_h
 
 extern volatile uint8_t threading_exec_flags;						// Global real time executor bitflag variable for spindle synchronization.
-extern volatile uint32_t threading_synchronization_pulse_count;			// Global synchronization pulse counter
-extern volatile uint32_t threading_sync_Last_timer_tics;				// Time at last sync pulse
+extern volatile uint8_t threading_sync_pulse_count;			// Global synchronization pulse counter
+extern volatile uint32_t threading_sync_last_timer_tics;				// Time at last sync pulse
 extern volatile uint32_t threading_sync_timer_tics_passed;				// Time passed sync pulse
-extern volatile float threading_sync_spindle_speed;						// The spindle speed calculated from the sync index pulses. Used for synchronizing the Z-axis.
-extern volatile uint32_t threading_index_pulse_count;					// Global index pulse counter
-extern volatile uint32_t threading_index_Last_timer_tics;				// Time at last index pulse
+extern volatile uint8_t threading_index_pulse_count;					// Global index pulse counter
+extern volatile uint32_t threading_index_last_timer_tics;				// Time at last index pulse
 extern volatile uint32_t threading_index_timer_tics_passed;				// Time passed index pulse
-extern volatile float threading_index_spindle_speed;					// The spindle speed calculated from the spindle index pulses. Used for displaying the real spindle speed.
+extern volatile uint32_t threading_index_spindle_speed;					// The spindle speed calculated from the spindle index pulses. Used for displaying the real spindle speed.
 extern volatile float threading_millimeters;							// The threading feed as reported by the planner
 extern volatile float threading_millimeters_target;						// The threading feed target as reported by the planner
 extern volatile float threading_millimeters_error;						// The threading feed error calculated at every synchronization pulsee
@@ -42,7 +41,8 @@ void ReportMessageFloat(const char *s, float value);
 void report_synchronization_state();
 //void threading_get_start_position_z();
 //void threading_calculate_target_position();
-void process_spindle_index_pin_hit();
+void process_spindle_index_pulse();
+void process_spindle_synchronization_pulse()
 void update_planner_feed_rate();
 void threading_reset();
 #endif
