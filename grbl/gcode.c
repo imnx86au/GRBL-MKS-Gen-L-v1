@@ -1047,7 +1047,7 @@ uint8_t gc_execute_line(char *line)
 		 //pl_data->condition ;										
 		 pl_data->condition |= PL_COND_FLAG_FEED_PER_REV | PL_COND_FLAG_NO_FEED_OVERRIDE;	//During threading (G33) no feed override. Set condition to allow updating the feed rate at every sync pulse
 		 while (threading_index_pulse_count<SPINDLE_INDEX_PULSES_BEFORE_START_G33){
-			protocol_exec_rt_system();		//process real time commands until the spindle has made enough revolutions, maybe this has to be removed to improve starting at the right position
+			protocol_exec_rt_system();		//process real time commands until the spindle has made enough revolutions, mybe this has to be removed to improve starting at the right position
 		 }
 		 threading_reset();	//reset to undo counting and processing of the previous 4 index pulses
 		 pl_data->feed_rate=gc_block.values.k * threading_index_spindle_speed;		//set the start feed rate 
