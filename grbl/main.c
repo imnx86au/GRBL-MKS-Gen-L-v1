@@ -97,7 +97,7 @@ int main(void)
     sys_rt_exec_accessory_override = 0;
 	
 	threading_index_pulse_count=0;
-	threading_sync_pulse_count=0;
+	threading_synchronization_pulse_count=0;
 
     // Reset Grbl primary systems.
     serial_reset_read_buffer(); // Clear serial read buffer
