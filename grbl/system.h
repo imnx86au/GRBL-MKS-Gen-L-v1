@@ -37,8 +37,9 @@
 #define EXEC_MOTION_CANCEL  bit(6) // bitmask 01000000
 #define EXEC_SLEEP          bit(7) // bitmask 10000000
 
-#define EXEC_SPINDLE_INDEX  bit(0) // bitmask 00000001
-#define EXEC_SPINDLE_SYNC   bit(1) // bitmask 00000010
+#define EXEC_SPINDLE_INDEX_PULSE  bit(0) // bitmask 00000001
+#define EXEC_PLANNER_SYNC_PULSE   bit(1) // bitmask 00000010
+#define EXEC_SPINDLE_INDEX_REPORT bit(3) // bitmask 00000100
 
 // Alarm executor codes. Valid values (1-255). Zero is reserved.
 #define EXEC_ALARM_HARD_LIMIT           1
@@ -215,6 +216,7 @@ void system_set_exec_motion_override_flag(uint8_t mask);
 void system_set_exec_accessory_override_flag(uint8_t mask);
 void system_clear_exec_motion_overrides();
 void system_clear_exec_accessory_overrides();
-
+void system_clear_threading_exec_flag(uint8_t mask);
+void system_set_threading_exec_flag(uint8_t mask);
 
 #endif

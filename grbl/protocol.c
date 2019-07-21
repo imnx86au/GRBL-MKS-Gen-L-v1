@@ -209,10 +209,9 @@ void protocol_auto_cycle_start()
 // limit switches, or the main program.
 void protocol_execute_realtime()
 {
-  protocol_exec_rt_system();
+  protocol_exec_rt_system();								  // execute all other real time teaks		
   if (sys.suspend) { protocol_exec_rt_suspend(); }
 }
-
 
 // Executes run-time commands, when required. This function primarily operates as Grbl's state
 // machine and controls the various real-time features Grbl has to offer.
@@ -242,22 +241,20 @@ void protocol_exec_rt_system()
     system_clear_exec_alarm(); // Clear alarm
   }
   
-  #ifdef LATHE
-  //processing spindle pulse and spindle synchronization pulse
-  rt_exec = threading_sync_state;	//save the volatile value
-  //if (bit_istrue(rt_exec,EXEC_SPINDLE_SYNC)){
-	  ////threading_sync_timer_tics_passed=get_timer_ticks()-threading_sync_Last_timer_tics;
-	  ////threading_sync_Last_timer_tics+=threading_sync_timer_tics_passed;
-	  ////threading_synchronization_pulse_count++;
-	  //bit_false(threading_sync_state,EXEC_SPINDLE_SYNC);
-    //}
-   if (bit_istrue(rt_exec,EXEC_SPINDLE_INDEX)){
-	  //report_RPM_state();
-	  //if (bit_istrue(settings.status_report_mask,BITFLAG_REPORT_SYNC_STATE)) 	//report on every index pulse
-		  report_synchronization_state();
-	 bit_false(threading_sync_state,EXEC_SPINDLE_INDEX);
-	  }
-  #endif
+  //processing spindle pulse and spindle synchronization pulse  //For more accuracy this could be moved to the interrupt handler. Have to check the difference! 
+  //rt_exec = threading_exec_flags;	//save the volatile value
+  if (bit_istrue(threading_exec_flags, EXEC_SPINDLE_INDEX_PULSE)) { //process the detection of a spindle index pulse;
+	process_spindle_index_pin_hit(); 
+	system_clear_threading_exec_flag(EXEC_SPINDLE_INDEX_PULSE);
+  } 
+   if (bit_istrue(threading_exec_flags, EXEC_PLANNER_SYNC_PULSE)) { //update the planner if a sync pulse was detected;
+	update_planner_feed_rate(); 
+	system_clear_threading_exec_flag(EXEC_PLANNER_SYNC_PULSE);
+  }
+  if (bit_istrue(rt_exec,EXEC_SPINDLE_INDEX_REPORT)){
+	report_synchronization_state();
+	system_clear_threading_exec_flag(EXEC_SPINDLE_INDEX_REPORT);
+  }
   
   rt_exec = sys_rt_exec_state; // Copy volatile sys_rt_exec_state.
   if (rt_exec) {
@@ -270,6 +267,7 @@ void protocol_exec_rt_system()
     // Execute and serial print status
     if (rt_exec & EXEC_STATUS_REPORT) {
       report_realtime_status();
+	 //report_synchronization_state();
       system_clear_exec_state_flag(EXEC_STATUS_REPORT);
     }
 

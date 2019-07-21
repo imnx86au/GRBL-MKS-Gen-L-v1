@@ -595,6 +595,11 @@ void report_realtime_status()
     }
   #endif
   
+  //if (bit_istrue(threading_sync_state, EXEC_SPINDLE_INDEX_REPORT))  {
+	//printPgmString(PSTR("|Te:"));
+    //printFloat(threading_millimeters_error,2);
+	//bit_false(threading_sync_state, EXEC_SPINDLE_INDEX_REPORT);
+  //}
   //#ifdef LATHE
   //// Report realtime spindle speed when bit is set in report mask
   //if (bit_istrue(settings.status_report_mask,BITFLAG_RT_STATUS_RPM_STATE) ) {
