@@ -22,7 +22,7 @@
 
 volatile uint8_t threading_exec_flags;							// Global realtime executor bitflag variable for spindle synchronization.
 volatile uint8_t threading_index_pulse_count;					// Global index pulse counter
-volatile uint8_t threading_synchronization_pulse_count;		// Global synchronization pulse counter
+volatile uint8_t threading_sync_pulse_count;		// Global synchronization pulse counter
 volatile uint32_t threading_sync_Last_timer_tics;				// Time at last sync pulse
 volatile uint32_t threading_sync_timer_tics_passed;				// Time passed sync pulse
 volatile uint32_t threading_index_Last_timer_tics;				// Time at last index pulse
@@ -48,34 +48,6 @@ void ReportMessageFloat(const char *s, float value)
 	printFloat(value,2);
 }
 
-// returns the Z-axis position in steps
-int32_t threading_get_z_position_steps()
-{
-	int32_t steps;
-	ATOMIC_BLOCK(ATOMIC_RESTORESTATE){steps=sys_position[Z_AXIS];}		// Copy the current Z-ax position using atomic to avoid errors due to stepper updates
-	return steps;
-}
-// returns the Z-axis position in steps
-float threading_get_z_position_mm()
-{
-	return (float) threading_get_z_position_steps() / settings.steps_per_mm[Z_AXIS];
-}
-// returns the Z-axis position change in steps
-int32_t threading_get_z_position_change_steps()
-{
-	return threading_get_z_position_steps()-threading_start_position_steps;
-}
-// returns the Z-axis position change in mm
-float threading_get_z_position_abs_change_mm()
-{
-	return (float) threading_get_z_position_change_steps() / settings.steps_per_mm[Z_AXIS];					// Calculate the movement in mm. Have to adopt for corexy at some time
-}
-//Calculate the next target position based on the K value set in Gcode and the number of synchronization pulses per rotation
-//void threading_calculate_target_position()
-//{
-	//threading_millimeters_target-=threading_mm_per_synchronization_pulse;	//Calculate the new target
-//}
-
 // Initializes the G33 threading pass by resetting the timer, spindle counter,
 // setting the current z-position as reference and calculating the (next) target position.
 void threading_init(float K_value)
@@ -97,7 +69,7 @@ void threading_reset()
 // The not time critical processing should be handled by protocol_exec_rt_system()
 // This is signaled by the EXEC_SPINDLE_INDEX flag
 // The Z-axis feedrate is synchronized by calling update_planner_feed_rate() when SPINDLE_SYNC_PULSES_PER_ROTATION==1 otherwise this is handled by the synchronization puls event
-void process_spindle_index_pin_hit()
+void process_spindle_index_pulse()
 {
 	//report_synchronization_state();return;
 	threading_index_timer_tics_passed=get_timer_ticks()-threading_index_Last_timer_tics;	// Calculate the time between index pulses
@@ -105,8 +77,19 @@ void process_spindle_index_pin_hit()
 	threading_index_pulse_count++;															// Increase the pulse count
 	threading_index_spindle_speed = 15000000 / threading_index_timer_tics_passed;			// calculate the spindle speed  at this place (not in the report) reduces the CPU time because a GUI will update more frequently
 	sys.spindle_speed=threading_index_spindle_speed;										// Show the real spindle speed
-	system_set_threading_exec_flag(EXEC_PLANNER_SYNC_PULSE);			    				// Signal the receive of a spindle/sync index pulse, should test if sync pulses per revolution = s
+	if (SPINDLE_SYNC_PULSES_PER_ROTATION==1)
+	{
+		threading_sync_timer_tics_passed=threading_index_timer_tics_passed;					//set the synchronization timer tics passed
+		system_set_threading_exec_flag(EXEC_PLANNER_SYNC_PULSE);							// Signal the receive of a synchronization pulse
+	}
 	system_set_threading_exec_flag(EXEC_SYNCHRONIZATION_STATE_REPORT);						// Every index pulse triggers a sunchronizations status report, not every sync pulse!
+}
+
+void process_spindle_synchronization_pulse()
+{
+	threading_sync_timer_tics_passed=get_timer_ticks()-threading_sync_Last_timer_tics;	// Calculate the time between index pulses
+	threading_sync_timer_tics_passed+=threading_sync_timer_tics_passed;						// adjust for calculating the next time
+	threading_sync_pulse_count++;															// Increase the synchronization pulse count
 }
 
 // This routine does all processing needed to keep the Z-axis in sync with the spindle during a threading pass G33

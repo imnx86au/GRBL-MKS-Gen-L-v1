@@ -71,14 +71,10 @@ ISR(CONTROL_INT_vect)
       bit_true(sys_rt_exec_state, EXEC_FEED_HOLD); 
     } else if (bit_istrue(pin,CONTROL_PIN_INDEX_SAFETY_DOOR)) {
       bit_true(sys_rt_exec_state, EXEC_SAFETY_DOOR);
-	} else if (bit_istrue(pin,CONTROL_PIN_INDEX_SPINDLE_SYNC)) {	// Detected a threading spindle sync pulse. Beware, this is not the spindle sync pulse
-		//process_spindle_index_pin_hit();							// Do the interrupt handling of the index pulse as soon as possible
-		//system_set_threading_exec_flag(EXEC_SPINDLE_INDEX_REPORT);	// Every index pulse triggers a report, not every sync pulse!
-		//ReportMessageUint8("Rs",threading_exec_flags);
-	 }	
+	} else if (bit_istrue(pin,CONTROL_PIN_INDEX_SPINDLE_SYNC)) {	// Detected a threading spindle synchronization pulse. Beware, this is not the spindle index pulse
+	    bit_true(threading_exec_flags,EXEC_PLANNER_SYNC_PULSE);
+	}	 
   }
-		//report_synchronization_state();
-		//ReportMessageUint8("Rs",threading_exec_flags);
 }
 
 
