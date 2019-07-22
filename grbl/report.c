@@ -533,7 +533,9 @@ void report_realtime_status()
     printFloat_RateValue(st_get_realtime_rate());
     serial_write(',');
     //printFloat(sys.spindle_speed,N_DECIMAL_RPMVALUE);
-    printFloat(threading_index_spindle_speed,0);
+	if (TimerTicsPassedSinceLastIndexPulse()<(uint32_t) 1500000)		// Spindle speed is > 10 RPM
+		printFloat(threading_index_spindle_speed,0);
+	else printFloat(0,0);
   #endif
 
   #ifdef REPORT_FIELD_PIN_STATE
@@ -595,19 +597,7 @@ void report_realtime_status()
       }  
     }
   #endif
-  
-  //if (bit_istrue(threading_sync_state, EXEC_SPINDLE_INDEX_REPORT))  {
-	//printPgmString(PSTR("|Te:"));
-    //printFloat(threading_millimeters_error,2);
-	//bit_false(threading_sync_state, EXEC_SPINDLE_INDEX_REPORT);
-  //}
-  //#ifdef LATHE
-  //// Report realtime spindle speed when bit is set in report mask
-  //if (bit_istrue(settings.status_report_mask,BITFLAG_RT_STATUS_RPM_STATE) ) {
-	  //report_RPM_state();
-  //}
-  //#endif
-
+ 
   serial_write('>');
   report_util_line_feed();
 }

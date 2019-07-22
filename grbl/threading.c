@@ -64,6 +64,14 @@ void threading_reset()
 	threading_millimeters_target=0;																			//Set this value to 0, will be update at the start of the planner block
 	system_clear_threading_exec_flag(0xff);																		//Clear all the bits to avoid executing
 }
+
+//Returns the time in 4 useconds tics since the last index pulse
+uint32_t TimerTicsPassedSinceLastIndexPulse()
+{
+  return get_timer_ticks()-threading_index_Last_timer_tics;
+}
+
+
 // This routine processes the spindle index pin hit by increasing the index pulse counter and calculating the time between pulses
 // This speed is used for showing the actual spindle speed in the report
 // The not time critical processing should be handled by protocol_exec_rt_system()

@@ -39,8 +39,7 @@ extern void threading_init(float K_value);								//initializes the G33 threadin
 void ReportMessageUint8(const char *s, uint8_t value);
 void ReportMessageFloat(const char *s, float value);
 void report_synchronization_state();
-//void threading_get_start_position_z();
-//void threading_calculate_target_position();
+uint32_t TimerTicsPassedSinceLastIndexPulse();
 void process_spindle_index_pulse();
 void process_spindle_synchronization_pulse();
 void update_planner_feed_rate();
