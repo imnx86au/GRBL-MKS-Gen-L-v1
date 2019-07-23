@@ -9,10 +9,12 @@
 #define AverageCount 25
 
 #define PulsesPerRevolution 4
-#define PulseHighMin 10
+#define PulseTimeLowMin 10 //ms
 
 #define IndexPin 13
 #define SyncPin 12
+
+//pulses generated simulate a normally open sensor
 
 //#define DebugInfo
 //define one or none of the fixed speed simulation setting
@@ -97,14 +99,14 @@ void loop()
 #elif defined FixSpeed600RPM
       PulseTime = MapRPMToDelay(600);
 #endif
-      PulseTime -= PulseHighMin;
-      if (i == 0) digitalWrite(IndexPin, HIGH); // Turn the LED on (Note that LOW is the voltage level
-      else digitalWrite(IndexPin, LOW);         // To keep the pulses symetric set low to give the same delay between pulses
-      digitalWrite(SyncPin, HIGH);     // Turn the LED on (Note that LOW is the voltage level
-      delay(PulseHighMin);                         // Wait for a second
-      digitalWrite(SyncPin, LOW);    // Turn the LED off by making the voltage HIGH
-      digitalWrite(IndexPin, LOW);   // Turn the LED off by making the voltage HIGH
-      delay(PulseTime);    // Wait for two seconds (to demonstrate the active low LED)
+      PulseHigh = PulseTime - PulseTimeLowMin;
+      if (i == 0) digitalWrite(IndexPin, LOW); // Turn the LED on (Note that LOW is the voltage level
+      else digitalWrite(IndexPin, HIGH);         // To keep the pulses symetric set low to give the same delay between pulses
+      digitalWrite(SyncPin, LOW);     // Turn the LED on (Note that LOW is the voltage level
+      delay(PulseTimeLowMin);                         // Wait for a second
+      digitalWrite(SyncPin, HIGH);    // Turn the LED off by making the voltage HIGH
+      digitalWrite(IndexPin, HIGH);   // Turn the LED off by making the voltage HIGH
+      delay(PulseHigh);    // Wait for two seconds (to demonstrate the active low LED)
     }
 #ifdef DebugInfo
     ShowInfo();

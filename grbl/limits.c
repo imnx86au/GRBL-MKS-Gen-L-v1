@@ -169,7 +169,7 @@ uint8_t limits_get_state(uint8_t selected_pins) //
   #endif
 #else
 
-//This routine processes the limit pins change events. 
+//Processes the limit pins change events. 
 //It is called when the limit pins change event is trigged eventually after a software debounce
 // Ignore limit switches if already in an alarm state or in-process of executing an alarm.
 // When in the alarm state, Grbl should have been reset or will force a reset, so any pending
@@ -182,7 +182,6 @@ void process_limit_pin_change_event()
 	 if (!(sys_rt_exec_alarm)) {
 	   if (limits_get_state(LIMIT_PIN_MASK_Y_AXIS)) {	// This is the lathe version so Y-axis limit pin hits are spindle index pulses so handle them and do not reset controller
 		   system_set_threading_exec_flag(EXEC_SPINDLE_INDEX_PULSE);
-		   //process_spindle_index_pin_hit();
        }
       else 
         if (limits_get_state(LIMIT_PIN_MASK_ALL_EXCEPT_Y_AXIS)) { // handle all axis except the y-axis
@@ -193,7 +192,7 @@ void process_limit_pin_change_event()
    }
 }
 
-// This is the Limit Pin Change Interrupt, which handles the hard limit feature. A bouncing 
+// The Limit Pin Change Interrupt handles the hard limit feature. A bouncing 
 // limit switch can cause a lot of problems, like false readings and multiple interrupt calls.
 // If a switch is triggered at all, something bad has happened and treat it as such, regardless
 // if a limit switch is being disengaged. It's impossible to reliably tell the state of a
@@ -209,13 +208,28 @@ void process_limit_pin_change_event()
     {
 		process_limit_pin_change_event(); //no debouncing
     }  
-  #else // OPTIONAL: Software debounce limit pin routine.
-    // Upon limit pin change, enable watchdog timer to create a short delay. 
-    ISR(LIMIT_INT_vect) { if (!(WDTCSR & (1<<WDIE))) { WDTCSR |= (1<<WDIE); } }
-    ISR(WDT_vect) // Watchdog timer ISR
+  #else
+    // Upon limit pin change, Software debounce by enabling watchdog timer that will handle the pin change after a short delay (watchdog time out). 
+    ISR(LIMIT_INT_vect)
+	{
+		if (limits_get_state(LIMIT_PIN_MASK_Y_AXIS))
+		{
+		  process_limit_pin_change_event(); //no debouncing
+		}
+		else
+		{
+		   if (!(WDTCSR & (1<<WDIE)))  // If the watchdog is not enabled
+		   {
+			    WDTCSR |= (1<<WDIE);   // Enable watchdog
+		   }
+		}
+	}
+		
+    //Watch dog timeout interrupt (33 ms), disable watchdog and call pin change event
+	ISR(WDT_vect) // Watchdog timer ISR
     {
       WDTCSR &= ~(1<<WDIE); // Disable watchdog timer. 
-	  process_limit_pin_change_event(); //process after debouncing
+	  process_limit_pin_change_event(); //debounced, now process
     }
   #endif
 #endif // DEFAULTS_RAMPS_BOARD

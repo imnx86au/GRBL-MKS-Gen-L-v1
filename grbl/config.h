@@ -42,10 +42,10 @@
 #define SPINDLE_INDEX_PULSES_BEFORE_START_G33 3
 
 //Define the serial port to use, the mega2560 has four (USART0 .. USART3) uncomment just one
-//#define SERIAL0		//uncomment to use USART0 TX0/RX0 (default)  only one usart may be selected
-//#define SERIAL1		//uncomment to use USART1 TX1/RX1 (default)
-//#define SERIAL2		//uncomment to use USART2 TX2/RX2 (default)
-#define SERIAL3			//uncomment to use USART3 TX3/RX3 (default)//#define SERIAL1		//uncomment to use USART1 RX1/TX1
+//#define SERIAL0		//uncomment to use USART0 TX0/RX0 (default) //uncomment to use USART0 RX0/TX0
+//#define SERIAL1		//uncomment to use USART1 TX1/RX1 (default) //uncomment to use USART1 RX1/TX1
+//#define SERIAL2		//uncomment to use USART2 TX2/RX2 (default) //uncomment to use USART2 RX2/TX2
+#define SERIAL3			//uncomment to use USART3 TX3/RX3 (default)	//uncomment to use USART3 RX3/TX3
 
 // Define CPU pin map and default settings.
 // NOTE: OEMs can avoid the need to maintain/update the defaults.h and cpu_map.h files and use only
