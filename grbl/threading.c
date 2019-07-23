@@ -31,7 +31,7 @@ volatile uint32_t threading_index_spindle_speed;					// The measured spindle spe
 float threading_mm_per_synchronization_pulse;					// The factor to calculate the feed rate from the spindle speed
 volatile float threading_millimeters;							// The threading feed as reported by the planner
 volatile float threading_millimeters_target;						// The threading feed target as reported by the planner
-volatile float threading_millimeters_error;						// The threading feed error calculated at every synchronization pulsee
+volatile float synchronization_millimeters_error;						// The threading feed error calculated at every synchronization pulsee
 volatile float threading_feed_rate;								// The threading feed rate as reported by the planner
 int32_t threading_start_position_steps;							// The start position in steps used to calculate the 
 
@@ -107,13 +107,15 @@ void process_spindle_synchronization_pulse()
 // Calculates the feed rate needed to be at this position (neglecting acceleration time)
 // Sets this feed rate for the current block in the planner
 // Recalculates the feed rates for all the blocks in the planner as if a new block was added to the planner que
+// If the current block isn't a G33 motion, the synchronization_millimeters_error will be set to zero
 void update_planner_feed_rate() {
 plan_block_t *plan = plan_get_current_block();
-	if (bit_istrue(threading_exec_flags, EXEC_PLANNER_SYNC_PULSE)){					// This bit it set on every spindle/synchronization pulse, independent of a G33 operation is busy
+	if (bit_istrue(threading_exec_flags, EXEC_PLANNER_SYNC_PULSE)){				// This bit it set on every spindle/synchronization pulse, independent of a G33 operation is busy
 		if ((plan!=NULL) && (plan->condition & PL_COND_FLAG_FEED_PER_REV)) {	// update only during threading
 			plan_update_velocity_profile_parameters();							// call plan_compute_profile_nominal_speed() that wil calculate the requested feed rate
 			plan_cycle_reinitialize();											// update the feed rates in the blocks
 		}
+		else synchronization_millimeters_error=0;										// set the error to zero so it can be used in reports
 	}
     system_clear_threading_exec_flag( EXEC_PLANNER_SYNC_PULSE);	//set the bit false to prevent processing again
 }
@@ -136,7 +138,7 @@ void report_synchronization_state()
     	////ReportMessagef("  Zc:",threading_position_change);			//report the Z-axis position error at every index pulse
 	  ////ReportMessagef("  Tp:",threading_millimeters);					//report the threading position 
 	  ////ReportMessagef("  Tt:",threading_millimeters_target);			//report the threading position target
-	  ReportMessageFloat("  Te:",threading_millimeters_error);				//report the threading position error
+	  ReportMessageFloat("  Te:",synchronization_millimeters_error);				//report the threading position error
 	  ///ReportMessagef("  Tf:",threading_feed_rate);				//report the threading position error
 	  //printFloat(threading_millimeters_error,2);
 	  report_util_line_feed();

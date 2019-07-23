@@ -17,3 +17,23 @@ Done 2019-06-30 Disable limit switch alarm on Y-axis limit
 - add configuration setting for synchronisation pulses per revolution
 - add probe pulse counter counting at every probe input high/low transition debounced
 
+    ////// Upon limit pin change, enable watchdog timer to create a short delay. 
+    ISR(LIMIT_INT_vect)
+	{ 
+		if (limits_get_state(LIMIT_PIN_MASK_Y_AXIS)) { //process Y-axis without debouncing
+			//process_limit_pin_change_event(); //process after debouncing
+		//}
+		//else {
+    	  if (!(WDTCSR & (1<<WDIE))) {	// if the watch dog interrupt is not enabled
+	        WDTCSR |= (1<<WDIE);		//enable the watch dog interrupt
+	      } 
+		//}
+	}
+   
+	//After the Watch dog timeout (33 ms) the limit change is handled
+	ISR(WDT_vect) // Watchdog timer ISR
+    {
+      WDTCSR &= ~(1<<WDIE); // Disable watchdog timer. 
+	  process_limit_pin_change_event(); //process after debouncing
+    }
+  //#endif

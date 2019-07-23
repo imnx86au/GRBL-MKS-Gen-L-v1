@@ -597,6 +597,10 @@ void report_realtime_status()
       }  
     }
   #endif
+	if (SPINDLE_SYNC_PULSES_PER_ROTATION>0) {	// report the synchronization error if encoder(s) are connected
+	  printPgmString(PSTR("|Se:"));
+	  printFloat(synchronization_millimeters_error,2);
+	}
  
   serial_write('>');
   report_util_line_feed();
