@@ -248,6 +248,7 @@ void protocol_exec_rt_system()
 	system_clear_threading_exec_flag(EXEC_SPINDLE_INDEX_PULSE);
 	if (settings.sync_pulses_per_revolution==1)												// Just an index pulse, emulate the receive of a sync pulse.
 	 system_set_threading_exec_flag(EXEC_PLANNER_SYNC_PULSE);							    // emulate the receive of a synchronization pulse
+	 report_synchronization_state();
     } 
    if (bit_istrue(threading_exec_flags, EXEC_PLANNER_SYNC_PULSE)) { //update the planner if a sync pulse was detected;
 	process_spindle_synchronization_pulse();
@@ -270,7 +271,6 @@ void protocol_exec_rt_system()
     // Execute and serial print status
     if (rt_exec & EXEC_STATUS_REPORT) {
       report_realtime_status();
-	 //report_synchronization_state();
       system_clear_exec_state_flag(EXEC_STATUS_REPORT);
     }
 
