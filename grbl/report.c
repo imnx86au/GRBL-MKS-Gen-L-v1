@@ -533,16 +533,15 @@ void report_realtime_status()
     }
   #endif
 
-  // Report realtime feed speed
+  // Report realtime feed & speed
   #ifdef REPORT_FIELD_CURRENT_FEED_SPEED
     printPgmString(PSTR("|FS:"));
     printFloat_RateValue(st_get_realtime_rate());
     serial_write(',');
     //printFloat(sys.spindle_speed,N_DECIMAL_RPMVALUE);
-	//if (TimerTicsPassedSinceLastIndexPulse()<(uint32_t) 1500000)		// Spindle speed is > 10 RPM
-		//printFloat(threading_index_spindle_speed,0);
-	//else printFloat(0,0);
-		printFloat(threading_index_pulse_count,0);
+	if (TimerTicsPassedSinceLastIndexPulse()<(uint32_t) 1500000)		// Spindle speed is > 10 RPM
+		printFloat(threading_index_spindle_speed,0);
+	else printFloat(0,0);
   #endif
 
   #ifdef REPORT_FIELD_PIN_STATE
