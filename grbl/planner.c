@@ -265,7 +265,7 @@ float plan_compute_profile_nominal_speed(plan_block_t *block)
 		  system_clear_threading_exec_flag(EXEC_PLANNER_SYNC_PULSE);									// clear the bit to avoid processing again
 		  threading_millimeters_target-=threading_mm_per_synchronization_pulse;							// calculate the new target					
 		  synchronization_millimeters_error=threading_millimeters_target-block->millimeters;					// calculate the position error. Note that block->millimeters counts down This has to be compensated at the next spindle pulse
-		  block->programmed_rate=(threading_mm_per_synchronization_pulse-synchronization_millimeters_error) / ((float) threading_index_timer_tics_passed / ((float) 15000000 * (float) SPINDLE_SYNC_PULSES_PER_ROTATION));		//calculate the new feed rate										// calculate the feed rate to reduce the error
+		  block->programmed_rate=(threading_mm_per_synchronization_pulse-synchronization_millimeters_error) / ((float) threading_index_timer_tics_passed / ((float) 15000000 * (float) settings.sync_pulses_per_revolution));		//calculate the new feed rate										// calculate the feed rate to reduce the error
 		  } 
 		} else {
 		if (!(block->condition & PL_COND_FLAG_NO_FEED_OVERRIDE)) { nominal_speed *= (0.01*sys.f_override); }

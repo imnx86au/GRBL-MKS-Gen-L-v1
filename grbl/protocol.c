@@ -243,10 +243,12 @@ void protocol_exec_rt_system()
   
   //processing spindle pulse and spindle synchronization pulse  //For more accuracy this could be moved to the interrupt handler. Have to check the difference! 
   //rt_exec = threading_exec_flags;	//save the volatile value
-  if (bit_istrue(threading_exec_flags, EXEC_SPINDLE_INDEX_PULSE)) { //process the detection of a spindle index pulse;
+  if (bit_istrue(threading_exec_flags, EXEC_SPINDLE_INDEX_PULSE)) { //process the detection of a spindle index pulse; This call may set the EXEC_PLANNER_SYNC_PULSE bi
 	process_spindle_index_pulse(); 
 	system_clear_threading_exec_flag(EXEC_SPINDLE_INDEX_PULSE);
-  } 
+	if (settings.sync_pulses_per_revolution==1)												// Just an index pulse, emulate the receive of a sync pulse.
+	 system_set_threading_exec_flag(EXEC_PLANNER_SYNC_PULSE);							    // emulate the receive of a synchronization pulse
+    } 
    if (bit_istrue(threading_exec_flags, EXEC_PLANNER_SYNC_PULSE)) { //update the planner if a sync pulse was detected;
 	process_spindle_synchronization_pulse();
 	update_planner_feed_rate(); 

@@ -33,3 +33,4 @@
 "130","X-axis maximum travel","millimeters","Maximum X-axis travel distance from homing switch. Determines valid machine space for soft-limits and homing search distances."
 "131","Y-axis maximum travel","millimeters","Maximum Y-axis travel distance from homing switch. Determines valid machine space for soft-limits and homing search distances."
 "132","Z-axis maximum travel","millimeters","Maximum Z-axis travel distance from homing switch. Determines valid machine space for soft-limits and homing search distances."
+"200","Number of synchronization pulses","Spindle synchronization pulses per revolution (0=none, 1=just spindle index, >1=spindle index and synchronization pulses)."

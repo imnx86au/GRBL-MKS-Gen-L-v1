@@ -91,10 +91,15 @@ static void report_util_setting_string(uint8_t n) {
 }
 */
 
-static void report_util_uint8_setting(uint8_t n, int val) { 
-  report_util_setting_prefix(n); 
-  print_uint8_base10(val); 
-  report_util_line_feed(); // report_util_setting_string(n); 
+static void report_util_uint8_setting(uint8_t n, int val) {
+	report_util_setting_prefix(n);
+	print_uint8_base10(val);
+	report_util_line_feed(); // report_util_setting_string(n);
+}
+static void report_util_uint16_setting(uint16_t n, int val) {
+  report_util_setting_prefix(n);
+  print_uint32_base10((uint32_t)val);
+  report_util_line_feed(); // report_util_setting_string(n);
 }
 static void report_util_float_setting(uint8_t n, float val, uint8_t n_decimal) { 
   report_util_setting_prefix(n); 
@@ -204,6 +209,7 @@ void report_grbl_settings() {
   report_util_float_setting(30,settings.rpm_max,N_DECIMAL_RPMVALUE);
   report_util_float_setting(31,settings.rpm_min,N_DECIMAL_RPMVALUE);
   report_util_uint8_setting(32,bit_istrue(settings.flags,BITFLAG_LASER_MODE));
+  report_util_uint16_setting(40,settings.sync_pulses_per_revolution);
   // Print axis settings
   uint8_t idx, set_idx;
   uint8_t val = AXIS_SETTINGS_START_VAL;
@@ -597,7 +603,7 @@ void report_realtime_status()
       }  
     }
   #endif
-	if (SPINDLE_SYNC_PULSES_PER_ROTATION>0) {	// report the synchronization error if encoder(s) are connected
+	if (settings.sync_pulses_per_revolution>0) {	// report the synchronization error if index or synchronization encoder(s) are connected
 	  printPgmString(PSTR("|Se:"));
 	  printFloat(synchronization_millimeters_error,2);
 	}

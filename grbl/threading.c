@@ -29,10 +29,10 @@ volatile uint32_t threading_index_Last_timer_tics;				// Time at last index puls
 volatile uint32_t threading_index_timer_tics_passed=0;	    	// Time passed index pulse
 volatile uint32_t threading_index_spindle_speed;					// The measured spindle speed used for threading
 float threading_mm_per_synchronization_pulse;					// The factor to calculate the feed rate from the spindle speed
-volatile float threading_millimeters;							// The threading feed as reported by the planner
+//volatile float threading_millimeters;							// The threading feed as reported by the planner
 volatile float threading_millimeters_target;						// The threading feed target as reported by the planner
 volatile float synchronization_millimeters_error;						// The threading feed error calculated at every synchronization pulsee
-volatile float threading_feed_rate;								// The threading feed rate as reported by the planner
+//volatile float threading_feed_rate;								// The threading feed rate as reported by the planner
 int32_t threading_start_position_steps;							// The start position in steps used to calculate the 
 
 void ReportMessageUint8(const char *s, uint8_t value)
@@ -52,7 +52,7 @@ void ReportMessageFloat(const char *s, float value)
 // setting the current z-position as reference and calculating the (next) target position.
 void threading_init(float K_value)
 {
-	threading_mm_per_synchronization_pulse= K_value / SPINDLE_SYNC_PULSES_PER_ROTATION;					// Calculate the global mm feed per synchronization pulse value.
+	threading_mm_per_synchronization_pulse= K_value / (float) settings.sync_pulses_per_revolution;					// Calculate the global mm feed per synchronization pulse value.
 	timekeeper_reset();																					//reset the timekeeper to avoid calculation errors when timer overflow occurs (to be sure)
 	ATOMIC_BLOCK(ATOMIC_RESTORESTATE){threading_start_position_steps=sys_position[Z_AXIS];}				//save the current Z-axis position for calculating the actual move. Use atomic to avoid errros due to stepper updates
 	threading_index_pulse_count=0;	//set the spindle index pulse count to 0
@@ -84,15 +84,12 @@ void process_spindle_index_pulse()
 	threading_index_Last_timer_tics+=threading_index_timer_tics_passed;						// adjust for calculating the next time
 	threading_index_pulse_count++;															// Increase the pulse count
 	threading_index_spindle_speed = 15000000 / threading_index_timer_tics_passed;			// calculate the spindle speed  at this place (not in the report) reduces the CPU time because a GUI will update more frequently
-	//sys.spindle_speed=threading_index_spindle_speed;										// Show the real spindle speed
-	if (SPINDLE_SYNC_PULSES_PER_ROTATION==1)
-	{
-		threading_sync_timer_tics_passed=threading_index_timer_tics_passed;					//set the synchronization timer tics passed
-		system_set_threading_exec_flag(EXEC_PLANNER_SYNC_PULSE);							// Signal the receive of a synchronization pulse
-	}
-	system_set_threading_exec_flag(EXEC_SYNCHRONIZATION_STATE_REPORT);						// Every index pulse triggers a sunchronizations status report, not every sync pulse!
+	if (settings.sync_pulses_per_revolution>0)												// If spindle synchronization is enabled
+	  system_set_threading_exec_flag(EXEC_SYNCHRONIZATION_STATE_REPORT);				    // Report a synchronizations status report on every index pulse!
 }
 
+// Processes the synchronization pulses by calculating the time between the synchronization pulses and preparing for the next pulse
+//
 void process_spindle_synchronization_pulse()
 {
 	threading_sync_timer_tics_passed=get_timer_ticks()-threading_sync_Last_timer_tics;	// Calculate the time between index pulses
@@ -115,7 +112,7 @@ plan_block_t *plan = plan_get_current_block();
 			plan_update_velocity_profile_parameters();							// call plan_compute_profile_nominal_speed() that wil calculate the requested feed rate
 			plan_cycle_reinitialize();											// update the feed rates in the blocks
 		}
-		else synchronization_millimeters_error=0;										// set the error to zero so it can be used in reports
+		else synchronization_millimeters_error=0;								// set the error to zero so it can be used in reports
 	}
     system_clear_threading_exec_flag( EXEC_PLANNER_SYNC_PULSE);	//set the bit false to prevent processing again
 }

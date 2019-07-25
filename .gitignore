@@ -11,3 +11,6 @@ README.md
 *.vs
 Debug
 build
+doc/Threading/Program memory sizes.txt
+doc/Threading/Program memory sizes.txt
+doc/Threading/Grbl program analisys.txt

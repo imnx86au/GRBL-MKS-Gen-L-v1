@@ -38,7 +38,7 @@
 #define LIMIT_PIN_MASK_ALL_EXCEPT_Y_AXIS 5		//Y-Axis pin
 
 #define LATHE
-#define SPINDLE_SYNC_PULSES_PER_ROTATION 4	
+//#define SPINDLE_SYNC_PULSES_PER_ROTATION 4	
 #define SPINDLE_INDEX_PULSES_BEFORE_START_G33 3
 
 //Define the serial port to use, the mega2560 has four (USART0 .. USART3) uncomment just one
@@ -444,7 +444,7 @@
 // available RAM, like when re-compiling for a Mega or Sanguino. Or decrease if the Arduino
 // begins to crash due to the lack of available RAM or if the CPU is having trouble keeping
 // up with planning new incoming motions as they are executed. 
- #define BLOCK_BUFFER_SIZE 25  // Uncomment to override default in planner.h.
+// #define BLOCK_BUFFER_SIZE 25  // Uncomment to override default in planner.h.
 
 // Governs the size of the intermediary step segment buffer between the step execution algorithm
 // and the planner blocks. Each segment is set of steps executed at a constant velocity over a
