@@ -539,7 +539,7 @@ void report_realtime_status()
     printFloat_RateValue(st_get_realtime_rate());
     serial_write(',');
     //printFloat(sys.spindle_speed,N_DECIMAL_RPMVALUE);
-	if (TimerTicsPassedSinceLastIndexPulse()<(uint32_t) 1500000)		// Spindle speed is > 10 RPM
+	if (timer_tics_passed_since_last_index_pulse()<(uint32_t) 1500000)		// Spindle speed is > 10 RPM
 		printFloat(threading_index_spindle_speed,0);
 	else printFloat(0,0);
   #endif
@@ -603,9 +603,18 @@ void report_realtime_status()
       }  
     }
   #endif
-	if (settings.sync_pulses_per_revolution>0) {	// report the synchronization error if index or synchronization encoder(s) are connected
+ 
+  // report the synchronization state (G33) 
+  if ( bit_istrue(threading_exec_flags, (EXEC_SYNCHRONIZATION_STATE_REPORT | EXEC_SYNCHRONIZATION_STATE_REPORT_FINAL))) {  // report if a (final) report is flagged
 	  printPgmString(PSTR("|Se:"));
-	  printFloat(synchronization_millimeters_error,2);
+	  if (bit_istrue(threading_exec_flags,EXEC_SYNCHRONIZATION_STATE_REPORT)) {											// report the synchronization error
+	    printFloat(synchronization_millimeters_error,2);
+	    bit_false(threading_exec_flags,EXEC_SYNCHRONIZATION_STATE_REPORT);												// clear the flag to avoid reporting the same value again
+	  }
+	  else {
+	    printFloat(0,2);																								// report a 0 value after G33 , looks better in a GUI
+	    bit_false(threading_exec_flags,EXEC_SYNCHRONIZATION_STATE_REPORT_FINAL);										// clear the flag to avoid reporting the same value again
+	  }
 	}
  
   serial_write('>');

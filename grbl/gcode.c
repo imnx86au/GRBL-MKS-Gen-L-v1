@@ -663,7 +663,7 @@ uint8_t gc_execute_line(char *line)
 			if  bit_isfalse(value_words,bit(WORD_K)) { FAIL(STATUS_GCODE_VALUE_WORD_MISSING); }					// [K value not given]
 			else if  bit_istrue(value_words,bit(WORD_F)) { FAIL(STATUS_GCODE_UNUSED_WORDS); }					// [F value given, but not needed], the check on other unused words will be done at the end
             else if (gc_block.modal.units == UNITS_MODE_INCHES) {gc_block.values.ijk[Z_AXIS] *= MM_PER_INCH;}	//calculate for inches
-			gc_block.values.k=gc_block.values.ijk[Z_AXIS];														//Set the feed per revolution in the (correct) k variable
+			//gc_block.values.k=gc_block.values.ijk[Z_AXIS];														//Set the feed per revolution in the (correct) k variable
             bit_false(value_words,bit(WORD_K));	//clear K word
         case MOTION_MODE_LINEAR:
           // [G1 Errors]: Feed rate undefined. Axis letter not configured or without real value.
@@ -1046,22 +1046,29 @@ uint8_t gc_execute_line(char *line)
         mc_line(gc_block.values.xyz, pl_data);
       } else if (gc_state.modal.motion == MOTION_MODE_SPINDLE_SYNC) {
 		 protocol_buffer_synchronize();			// Sync and finish all remaining buffered motions before moving on.
-		 threading_init(gc_block.values.k);		//initialize a threading pass, all counters are cleared, check on index pulses timeout can be done
+		 threading_init(gc_block.values.ijk[Z_AXIS]);		//initialize a threading pass, all counters are cleared, check on index pulses timeout can be done
 		 //pl_data->condition ;		
-		 pl_data->condition |= PL_COND_FLAG_FEED_PER_REV | PL_COND_FLAG_NO_FEED_OVERRIDE;	//During threading (G33) no feed override. Set condition to allow updating the feed rate at every sync pulse
+		 pl_data->condition |= (PL_COND_FLAG_FEED_PER_REV | PL_COND_FLAG_NO_FEED_OVERRIDE);	//During threading (G33) no feed override. Set condition to allow updating the feed rate at every sync pulse
 		 while (threading_index_pulse_count<SPINDLE_INDEX_PULSES_BEFORE_START_G33){
-			protocol_exec_rt_system();		//process real time commands until the spindle has made enough revolutions
-			// check on index pulse timeout has to be implemented here
+    		//print_uint32_base10(get_timer_ticks());
+			//report_util_line_feed();
+			if (get_timer_ticks()>1500000U){				//Check if the spindle pulses are fast enough
+				 FAIL(STATUS_INDEX_PULSE_TIMEOUT);	
+			}
+			protocol_exec_rt_system();						//process real time commands until the spindle has made enough revolutions or a timeout occurs
 		 }
 		 if (settings.sync_pulses_per_revolution>1) {		//There are synchronization pulses so also waiting for the next synchronization pulse
 		   threading_sync_pulse_count=0;
 		   while (threading_sync_pulse_count==0){
-			 protocol_exec_rt_system();		         //process real time commands until the spindle has made enough revolutions, maybe this has to be removed to improve starting at the right position
-			// check on synchronization pulse timeout has to be implemented here
-		    }
+    		//print_uint32_base10(get_timer_ticks());
+    		//report_util_line_feed();
+			 if  (get_timer_ticks()>3000000U)				//Check if the sync pulses are fast enough
+			   FAIL(STATUS_SYNCHRONIZATION_PULSE_TIMEOUT);	
+		   protocol_exec_rt_system();						//process real time commands until the spindle has made enough revolutions or a timeout occurs
+		   }
 		 }
-		 threading_reset();	//reset to undo counting and processing of the previous index and synchronisation pulses
-		 pl_data->feed_rate=gc_block.values.k * threading_index_spindle_speed;		//set the start feed rate 
+		 //threading_reset();	//reset to undo counting and processing of the previous index and synchronisation pulses
+		 pl_data->feed_rate=gc_block.values.ijk[Z_AXIS] * threading_index_spindle_speed;		//set the start feed rate 
          mc_line(gc_block.values.xyz, pl_data);	//execute the motion 
       } else if (gc_state.modal.motion == MOTION_MODE_SEEK) {
         pl_data->condition |= PL_COND_FLAG_RAPID_MOTION; // Set rapid motion condition flag.

@@ -29,11 +29,8 @@ volatile uint32_t threading_index_Last_timer_tics;				// Time at last index puls
 volatile uint32_t threading_index_timer_tics_passed=0;	    	// Time passed index pulse
 volatile uint32_t threading_index_spindle_speed;					// The measured spindle speed used for threading
 float threading_mm_per_synchronization_pulse;					// The factor to calculate the feed rate from the spindle speed
-//volatile float threading_millimeters;							// The threading feed as reported by the planner
 volatile float threading_millimeters_target;						// The threading feed target as reported by the planner
 volatile float synchronization_millimeters_error;						// The threading feed error calculated at every synchronization pulsee
-//volatile float threading_feed_rate;								// The threading feed rate as reported by the planner
-int32_t threading_start_position_steps;							// The start position in steps used to calculate the 
 
 void ReportMessageUint8(const char *s, uint8_t value)
 {
@@ -54,24 +51,34 @@ void threading_init(float K_value)
 {
 	threading_mm_per_synchronization_pulse= K_value / (float) settings.sync_pulses_per_revolution;					// Calculate the global mm feed per synchronization pulse value.
 	timekeeper_reset();																					//reset the timekeeper to avoid calculation errors when timer overflow occurs (to be sure)
-	ATOMIC_BLOCK(ATOMIC_RESTORESTATE){threading_start_position_steps=sys_position[Z_AXIS];}				//save the current Z-axis position for calculating the actual move. Use atomic to avoid errros due to stepper updates
-	threading_index_pulse_count=0;	//set the spindle index pulse count to 0
-	threading_reset();				//Sets the target position to zero and calculates the next target postion																					
+	//ATOMIC_BLOCK(ATOMIC_RESTORESTATE){threading_start_position_steps=sys_position[Z_AXIS];}				//save the current Z-axis position for calculating the actual move. Use atomic to avoid errors due to stepper updates
+	threading_reset();				//Sets the target position to zero and calculates the next target position																					
 }
 // Reset variables to start the threading
 void threading_reset()
 {
+	threading_index_pulse_count=0;	//set the spindle index pulse count to 0
+	threading_index_Last_timer_tics=0;
+	threading_sync_Last_timer_tics=0;
+	threading_sync_pulse_count=0;
 	threading_millimeters_target=0;																			//Set this value to 0, will be update at the start of the planner block
-	system_clear_threading_exec_flag(0xff);																		//Clear all the bits to avoid executing
+	system_clear_threading_exec_flag(0xff);																	//Clear all the bits to avoid executing
 }
 
 //Returns the time in 4 useconds tics since the last index pulse
-uint32_t TimerTicsPassedSinceLastIndexPulse()
+uint32_t TimerTicsPassed(uint32_t last_tics)
 {
-  return get_timer_ticks()-threading_index_Last_timer_tics;
+	uint32_t tics;
+	ATOMIC_BLOCK(ATOMIC_RESTORESTATE){tics=get_timer_ticks()-last_tics;}				//save the current Z-axis position for calculating the actual move. Use atomic to avoid errros due to stepper updates
+  return tics;
 }
-
-
+//Returns the time in 4 useconds tics since the last index pulse
+uint32_t timer_tics_passed_since_last_index_pulse()
+{
+	uint32_t tics;
+	ATOMIC_BLOCK(ATOMIC_RESTORESTATE){tics=get_timer_ticks()-threading_index_Last_timer_tics;}				//save the current Z-axis position for calculating the actual move. Use atomic to avoid errros due to stepper updates
+	return tics;
+	}
 // This routine processes the spindle index pin hit by increasing the index pulse counter and calculating the time between pulses
 // This speed is used for showing the actual spindle speed in the report
 // The not time critical processing should be handled by protocol_exec_rt_system()
@@ -79,13 +86,10 @@ uint32_t TimerTicsPassedSinceLastIndexPulse()
 // The Z-axis feedrate is synchronized by calling update_planner_feed_rate() when SPINDLE_SYNC_PULSES_PER_ROTATION==1 otherwise this is handled by the synchronization puls event
 void process_spindle_index_pulse()
 {
-	//report_synchronization_state();return;
 	threading_index_timer_tics_passed=get_timer_ticks()-threading_index_Last_timer_tics;	// Calculate the time between index pulses
 	threading_index_Last_timer_tics+=threading_index_timer_tics_passed;						// adjust for calculating the next time
 	threading_index_pulse_count++;															// Increase the pulse count
 	threading_index_spindle_speed = 15000000 / threading_index_timer_tics_passed;			// calculate the spindle speed  at this place (not in the report) reduces the CPU time because a GUI will update more frequently
-	if (settings.sync_pulses_per_revolution>0)												// If spindle synchronization is enabled
-	  system_set_threading_exec_flag(EXEC_SYNCHRONIZATION_STATE_REPORT);				    // Report a synchronizations status report on every index pulse!
 }
 
 // Processes the synchronization pulses by calculating the time between the synchronization pulses and preparing for the next pulse
@@ -117,27 +121,18 @@ plan_block_t *plan = plan_get_current_block();
     system_clear_threading_exec_flag( EXEC_PLANNER_SYNC_PULSE);	//set the bit false to prevent processing again
 }
 
-// Prints synchronization state.
-void report_synchronization_state()
+// returns true if Spindle sync is active otherwise false
+bool spindle_synchronization_active()
 {
 	plan_block_t *plan = plan_get_current_block();
-	if ((plan!=NULL) && (plan->condition & PL_COND_FLAG_FEED_PER_REV)) { //update only during threading
-	    //printPgmString(PSTR("Si: "));
-    	////print_uint32_base10(threading_index_pulse_count);
-    	////printPgmString(PSTR("|Ss: "));
-    	////print_uint32_base10(threading_synchronization_pulse_count);
-    	////printPgmString(PSTR("|Sp: "));
-    	////print_uint32_base10(threading_sync_timer_tics_passed);
-    	////printPgmString(PSTR("|Ip: "));
-    	////print_uint32_base10(threading_index_timer_tics_passed);
-    	////report_RPM_state();
-    	////ReportMessagef("  Zt:",threading_position_change_target);	//report the Z-axis position error at every index pulse
-    	////ReportMessagef("  Zc:",threading_position_change);			//report the Z-axis position error at every index pulse
-	  ////ReportMessagef("  Tp:",threading_millimeters);					//report the threading position 
-	  ////ReportMessagef("  Tt:",threading_millimeters_target);			//report the threading position target
+	if ((plan!=NULL) && (plan->condition & PL_COND_FLAG_FEED_PER_REV)) return true;
+	return false;
+}
+// Prints synchronization state.  just for debugging
+void report_synchronization_state()
+{
+	if (spindle_synchronization_active())  { //update only during threading
 	  ReportMessageFloat("  Te:",synchronization_millimeters_error);				//report the threading position error
-	  ///ReportMessagef("  Tf:",threading_feed_rate);				//report the threading position error
-	  //printFloat(threading_millimeters_error,2);
 	  report_util_line_feed();
 	}
 }

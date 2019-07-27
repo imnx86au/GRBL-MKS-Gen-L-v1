@@ -199,7 +199,7 @@ typedef struct {
 
 typedef struct {
   float f;         // Feed
-  float k;         // pitch (k parameter) for spindle sync mode (G33)
+  //float k;         // pitch (k parameter) for spindle sync mode (G33)
   float ijk[3];    // I,J,K Axis arc offsets
   uint8_t l;       // G10 or canned cycles parameters
   int32_t n;       // Line number

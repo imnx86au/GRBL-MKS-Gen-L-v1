@@ -240,25 +240,34 @@ void protocol_exec_rt_system()
     }
     system_clear_exec_alarm(); // Clear alarm
   }
-  
-  //processing spindle pulse and spindle synchronization pulse  //For more accuracy this could be moved to the interrupt handler. Have to check the difference! 
+  //processing spindle pulse and spindle synchronization pulse
   //rt_exec = threading_exec_flags;	//save the volatile value
-  if (bit_istrue(threading_exec_flags, EXEC_SPINDLE_INDEX_PULSE)) { //process the detection of a spindle index pulse; This call may set the EXEC_PLANNER_SYNC_PULSE bi
-	process_spindle_index_pulse(); 
+  if (bit_istrue(threading_exec_flags, EXEC_SPINDLE_INDEX_PULSE)) {                         //process the detection of a spindle index pulse; 
 	system_clear_threading_exec_flag(EXEC_SPINDLE_INDEX_PULSE);
+	if (settings.sync_pulses_per_revolution>0)	{											// If index pulses are enabled.
+	  process_spindle_index_pulse();														// Process the pulse so the RPM will be updated in the real time status report
+	  if (spindle_synchronization_active()) {												// if spindle synchronization is active
+        if bit_istrue(settings.status_report_mask,BITFLAG_RT_STATUS_SYNC_STATE){			// if a report is set for reporting the synchronization status report after every index pulse if set in settings
+	      system_set_threading_exec_flag((EXEC_SYNCHRONIZATION_STATE_REPORT | EXEC_SYNCHRONIZATION_STATE_REPORT_FINAL));	// set the reporting flags to report the synchronization status
+		}
+	  }
 	if (settings.sync_pulses_per_revolution==1)												// Just an index pulse, emulate the receive of a sync pulse.
-	 system_set_threading_exec_flag(EXEC_PLANNER_SYNC_PULSE);							    // emulate the receive of a synchronization pulse
-	 report_synchronization_state();
-    } 
-   if (bit_istrue(threading_exec_flags, EXEC_PLANNER_SYNC_PULSE)) { //update the planner if a sync pulse was detected;
-	process_spindle_synchronization_pulse();
-	update_planner_feed_rate(); 
-	system_clear_threading_exec_flag(EXEC_PLANNER_SYNC_PULSE);
-  }
-  if (bit_istrue(threading_exec_flags,EXEC_SYNCHRONIZATION_STATE_REPORT)){
-	report_synchronization_state();
-	system_clear_threading_exec_flag(EXEC_SYNCHRONIZATION_STATE_REPORT);
-  }
+	  system_set_threading_exec_flag(EXEC_PLANNER_SYNC_PULSE);							    // emulate the receive of a synchronization pulse if there is only an index pulse, eleminates wiring if the is just a index pulse
+	}						
+   } 
+   if (bit_istrue(threading_exec_flags, EXEC_PLANNER_SYNC_PULSE)) {							// if a sync pulse was detected;
+	 process_spindle_synchronization_pulse();
+	 if (spindle_synchronization_active()) {												// if in spindle sync mode
+       update_planner_feed_rate(); 
+       system_clear_threading_exec_flag(EXEC_PLANNER_SYNC_PULSE);
+	 }
+   }
+   //if bit_istrue(settings.status_report_mask,BITFLAG_RT_STATUS_SYNC_STATE){
+     //if (bit_istrue(threading_exec_flags,EXEC_SYNCHRONIZATION_STATE_REPORT)){
+	   //report_synchronization_state();
+	   //system_clear_threading_exec_flag(EXEC_SYNCHRONIZATION_STATE_REPORT);
+     //}
+   //}
   
   rt_exec = sys_rt_exec_state; // Copy volatile sys_rt_exec_state.
   if (rt_exec) {

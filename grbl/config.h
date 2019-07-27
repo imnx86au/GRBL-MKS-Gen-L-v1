@@ -40,6 +40,7 @@
 #define LATHE
 //#define SPINDLE_SYNC_PULSES_PER_ROTATION 4	
 #define SPINDLE_INDEX_PULSES_BEFORE_START_G33 3
+#define INDEX_PULSE_TIMEOUT_TICS 1500000U //6 seconds between index pulses, 10 RPM, every tic is 4 us
 
 //Define the serial port to use, the mega2560 has four (USART0 .. USART3) uncomment just one
 //#define SERIAL0		//uncomment to use USART0 TX0/RX0 (default) //uncomment to use USART0 RX0/TX0
