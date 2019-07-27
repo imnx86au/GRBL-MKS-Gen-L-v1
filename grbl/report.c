@@ -605,17 +605,18 @@ void report_realtime_status()
   #endif
  
   // report the synchronization state (G33) 
-  if ( bit_istrue(threading_exec_flags, (EXEC_SYNCHRONIZATION_STATE_REPORT | EXEC_SYNCHRONIZATION_STATE_REPORT_FINAL))) {  // report if a (final) report is flagged
+  if (bit_istrue(threading_exec_flags,(EXEC_SYNCHRONIZATION_STATE_REPORT))) {				// report if a report is flagged
 	  printPgmString(PSTR("|Se:"));
-	  if (bit_istrue(threading_exec_flags,EXEC_SYNCHRONIZATION_STATE_REPORT)) {											// report the synchronization error
-	    printFloat(synchronization_millimeters_error,2);
-	    bit_false(threading_exec_flags,EXEC_SYNCHRONIZATION_STATE_REPORT);												// clear the flag to avoid reporting the same value again
-	  }
-	  else {
-	    printFloat(0,2);																								// report a 0 value after G33 , looks better in a GUI
-	    bit_false(threading_exec_flags,EXEC_SYNCHRONIZATION_STATE_REPORT_FINAL);										// clear the flag to avoid reporting the same value again
-	  }
+	  printFloat(synchronization_millimeters_error,2);
+	  bit_false(threading_exec_flags,EXEC_SYNCHRONIZATION_STATE_REPORT);					// clear the flag to avoid reporting the same value again
+  }
+  else if (bit_istrue(threading_exec_flags,EXEC_SYNCHRONIZATION_STATE_REPORT_FINAL)) {		// if a final report is flagged
+    if (!spindle_synchronization_active()) {												// if spindle synchronization is inactive
+	  printPgmString(PSTR("|Se:"));															// Report report a 0 value after G33 , looks better in a GUI
+	  printFloat(0,2);																		
+	  bit_false(threading_exec_flags,EXEC_SYNCHRONIZATION_STATE_REPORT_FINAL);				// clear the flag to avoid reporting the same value again
 	}
+  }
  
   serial_write('>');
   report_util_line_feed();
