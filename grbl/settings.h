@@ -56,6 +56,7 @@
 #define BITFLAG_RT_STATUS_POSITION_TYPE     bit(0)
 #define BITFLAG_RT_STATUS_BUFFER_STATE      bit(1)
 #define BITFLAG_RT_STATUS_SYNC_STATE		bit(2)
+#define BITFLAG_RT_STATUS_SYNC_ERROR		bit(3)
 
 // Define settings restore bitflags.
 #define SETTINGS_RESTORE_DEFAULTS bit(0)

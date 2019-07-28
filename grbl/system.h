@@ -40,7 +40,8 @@
 #define EXEC_SPINDLE_INDEX_PULSE  bit(0) // bitmask 00000001
 #define EXEC_PLANNER_SYNC_PULSE   bit(1) // bitmask 00000010
 #define EXEC_SYNCHRONIZATION_STATE_REPORT bit(2) // bitmask 00000100
-#define EXEC_SYNCHRONIZATION_STATE_REPORT_FINAL bit(3) // bitmask 00000100
+#define EXEC_SYNCHRONIZATION_STATE_REPORT_ERROR bit(3) // bitmask 00000100
+#define EXEC_SYNCHRONIZATION_STATE_REPORT_FINAL bit(4) // bitmask 00000100
 
 // Alarm executor codes. Valid values (1-255). Zero is reserved.
 #define EXEC_ALARM_HARD_LIMIT           1

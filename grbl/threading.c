@@ -96,7 +96,7 @@ void process_spindle_index_pulse()
 //
 void process_spindle_synchronization_pulse()
 {
-	threading_sync_timer_tics_passed=get_timer_ticks()-threading_sync_Last_timer_tics;	// Calculate the time between index pulses
+	threading_sync_timer_tics_passed=get_timer_ticks()-threading_sync_Last_timer_tics;		// Calculate the time between index pulses
 	threading_sync_timer_tics_passed+=threading_sync_timer_tics_passed;						// adjust for calculating the next time
 	threading_sync_pulse_count++;															// Increase the synchronization pulse count
 }
@@ -128,11 +128,9 @@ bool spindle_synchronization_active()
 	if ((plan!=NULL) && (plan->condition & PL_COND_FLAG_FEED_PER_REV)) return true;
 	return false;
 }
-// Prints synchronization state.  just for debugging
-void report_synchronization_state()
+// Reports synchronization error.  just for debugging or checking threading accuracy
+void report_synchronization_error()
 {
-	if (spindle_synchronization_active())  { //update only during threading
-	  ReportMessageFloat("  Te:",synchronization_millimeters_error);				//report the threading position error
-	  report_util_line_feed();
-	}
+  ReportMessageFloat("  Se:",synchronization_millimeters_error);				//report the threading position error
+  report_util_line_feed();
 }
