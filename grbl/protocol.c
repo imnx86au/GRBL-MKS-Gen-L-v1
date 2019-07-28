@@ -240,8 +240,7 @@ void protocol_exec_rt_system()
     }
     system_clear_exec_alarm(); // Clear alarm
   }
-  //processing spindle pulse and spindle synchronization pulse
-  //rt_exec = threading_exec_flags;	//save the volatile value
+  //processing spindle index and synchronization pulses. Is done immediately after processing of the alarm to be as accurate as possible
   if (bit_istrue(threading_exec_flags, EXEC_SPINDLE_INDEX_PULSE)) {                         //process the detection of a spindle index pulse; 
 	system_clear_threading_exec_flag(EXEC_SPINDLE_INDEX_PULSE);
 	if (settings.sync_pulses_per_revolution>0)	{											// If index pulses are enabled.
@@ -259,11 +258,9 @@ void protocol_exec_rt_system()
 	}						
    } 
    if (bit_istrue(threading_exec_flags, EXEC_PLANNER_SYNC_PULSE)) {							// if a sync pulse was detected;
-	 process_spindle_synchronization_pulse();
-	 if (spindle_synchronization_active()) {												// if in spindle sync mode
-       update_planner_feed_rate(); 
-       system_clear_threading_exec_flag(EXEC_PLANNER_SYNC_PULSE);
-	 }
+	 process_spindle_synchronization_pulse();												// Index pulse is also used for reporting the actual spindle RPM
+     update_planner_feed_rate(); 
+     system_clear_threading_exec_flag(EXEC_PLANNER_SYNC_PULSE);
    }
    if (bit_istrue(threading_exec_flags,EXEC_SYNCHRONIZATION_STATE_REPORT_ERROR)){
      report_synchronization_error();

@@ -30,8 +30,9 @@ extern volatile uint32_t threading_index_Last_timer_tics;				// Time at last ind
 extern volatile uint32_t threading_index_timer_tics_passed;				// Time passed index pulse
 extern volatile uint32_t threading_index_spindle_speed;					// The spindle speed calculated from the spindle index pulses. Used for displaying the real spindle speed.
 extern volatile float threading_millimeters_target;						// The threading feed target as reported by the planner
-extern volatile float synchronization_millimeters_error;						// The threading feed error calculated at every synchronization pulsee
-extern float threading_mm_per_synchronization_pulse;								// Z-axis motion at each sync pulse. Is not declared as volatile because it is not updated by an ISR routine.
+extern volatile float synchronization_millimeters_error;				// The threading feed error calculated at every synchronization pulsee
+extern float threading_mm_per_synchronization_pulse;					// Z-axis motion at each sync pulse. Is not declared as volatile because it is not updated by an ISR routine.
+extern float threading_feed_rate_calculation_factor;					// factor used in plan_compute_profile_nominal_speed() and is calculated on startup for performance reasons.
 
 extern void threading_init(float K_value);								//initializes the G33 threading pass using the K value set in the gcode
 uint32_t timer_tics_passed_since_last_index_pulse();

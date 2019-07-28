@@ -22,15 +22,16 @@
 
 volatile uint8_t threading_exec_flags;							// Global realtime executor bitflag variable for spindle synchronization.
 volatile uint8_t threading_index_pulse_count;					// Global index pulse counter
-volatile uint8_t threading_sync_pulse_count;		// Global synchronization pulse counter
+volatile uint8_t threading_sync_pulse_count;					// Global synchronization pulse counter
 volatile uint32_t threading_sync_Last_timer_tics;				// Time at last sync pulse
 volatile uint32_t threading_sync_timer_tics_passed;				// Time passed sync pulse
 volatile uint32_t threading_index_Last_timer_tics;				// Time at last index pulse
 volatile uint32_t threading_index_timer_tics_passed=0;	    	// Time passed index pulse
-volatile uint32_t threading_index_spindle_speed;					// The measured spindle speed used for threading
+volatile uint32_t threading_index_spindle_speed;				// The measured spindle speed used for threading
 float threading_mm_per_synchronization_pulse;					// The factor to calculate the feed rate from the spindle speed
-volatile float threading_millimeters_target;						// The threading feed target as reported by the planner
-volatile float synchronization_millimeters_error;						// The threading feed error calculated at every synchronization pulsee
+volatile float threading_millimeters_target;					// The threading feed target as reported by the planner
+volatile float synchronization_millimeters_error;				// The threading feed error calculated at every synchronization pulse
+float threading_feed_rate_calculation_factor;				// factor used in plan_compute_profile_nominal_speed() and is calculated on startup for performance reasons.
 
 void ReportMessageUint8(const char *s, uint8_t value)
 {
@@ -44,14 +45,13 @@ void ReportMessageFloat(const char *s, float value)
 	  serial_write(*s++);
 	printFloat(value,2);
 }
-
 // Initializes the G33 threading pass by resetting the timer, spindle counter,
 // setting the current z-position as reference and calculating the (next) target position.
 void threading_init(float K_value)
 {
-	threading_mm_per_synchronization_pulse= K_value / (float) settings.sync_pulses_per_revolution;					// Calculate the global mm feed per synchronization pulse value.
+	threading_mm_per_synchronization_pulse= K_value / (float) settings.sync_pulses_per_revolution;						// Calculate the global mm feed per synchronization pulse value.
+	threading_feed_rate_calculation_factor  = ((float) 15000000 * (float) settings.sync_pulses_per_revolution);  //calculate the factor to speedup the planner during threading
 	timekeeper_reset();																					//reset the timekeeper to avoid calculation errors when timer overflow occurs (to be sure)
-	//ATOMIC_BLOCK(ATOMIC_RESTORESTATE){threading_start_position_steps=sys_position[Z_AXIS];}				//save the current Z-axis position for calculating the actual move. Use atomic to avoid errors due to stepper updates
 	threading_reset();				//Sets the target position to zero and calculates the next target position																					
 }
 // Reset variables to start the threading
@@ -110,15 +110,12 @@ void process_spindle_synchronization_pulse()
 // Recalculates the feed rates for all the blocks in the planner as if a new block was added to the planner que
 // If the current block isn't a G33 motion, the synchronization_millimeters_error will be set to zero
 void update_planner_feed_rate() {
-plan_block_t *plan = plan_get_current_block();
-	if (bit_istrue(threading_exec_flags, EXEC_PLANNER_SYNC_PULSE)){				// This bit it set on every spindle/synchronization pulse, independent of a G33 operation is busy
-		if ((plan!=NULL) && (plan->condition & PL_COND_FLAG_FEED_PER_REV)) {	// update only during threading
-			plan_update_velocity_profile_parameters();							// call plan_compute_profile_nominal_speed() that wil calculate the requested feed rate
-			plan_cycle_reinitialize();											// update the feed rates in the blocks
-		}
-		else synchronization_millimeters_error=0;								// set the error to zero so it can be used in reports
-	}
-    system_clear_threading_exec_flag( EXEC_PLANNER_SYNC_PULSE);	//set the bit false to prevent processing again
+  plan_block_t *plan = plan_get_current_block();
+  if ((plan!=NULL) && (plan->condition & PL_COND_FLAG_FEED_PER_REV)) {	// update only during threading
+    plan_update_velocity_profile_parameters();							// call plan_compute_profile_nominal_speed() that wil calculate the requested feed rate
+	plan_cycle_reinitialize();											// update the feed rates in the blocks
+  }
+  else synchronization_millimeters_error=0;								// set the error to zero so it can be used in reports
 }
 
 // returns true if Spindle sync is active otherwise false

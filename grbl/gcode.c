@@ -1050,8 +1050,6 @@ uint8_t gc_execute_line(char *line)
 		 //pl_data->condition ;		
 		 pl_data->condition |= (PL_COND_FLAG_FEED_PER_REV | PL_COND_FLAG_NO_FEED_OVERRIDE);	//During threading (G33) no feed override. Set condition to allow updating the feed rate at every sync pulse
 		 while (threading_index_pulse_count<SPINDLE_INDEX_PULSES_BEFORE_START_G33){
-    		//print_uint32_base10(get_timer_ticks());
-			//report_util_line_feed();
 			if (get_timer_ticks()>1500000U){				//Check if the spindle pulses are fast enough
 				 FAIL(STATUS_INDEX_PULSE_TIMEOUT);	
 			}
@@ -1060,8 +1058,6 @@ uint8_t gc_execute_line(char *line)
 		 if (settings.sync_pulses_per_revolution>1) {		//There are synchronization pulses so also waiting for the next synchronization pulse
 		   threading_sync_pulse_count=0;
 		   while (threading_sync_pulse_count==0){
-    		//print_uint32_base10(get_timer_ticks());
-    		//report_util_line_feed();
 			 if  (get_timer_ticks()>3000000U)				//Check if the sync pulses are fast enough
 			   FAIL(STATUS_SYNCHRONIZATION_PULSE_TIMEOUT);	
 		   protocol_exec_rt_system();						//process real time commands until the spindle has made enough revolutions or a timeout occurs
