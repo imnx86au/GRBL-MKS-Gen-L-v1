@@ -33,17 +33,19 @@ volatile float threading_millimeters_target;					// The threading feed target as
 volatile float synchronization_millimeters_error;				// The threading feed error calculated at every synchronization pulse
 float threading_feed_rate_calculation_factor;				// factor used in plan_compute_profile_nominal_speed() and is calculated on startup for performance reasons.
 
-void ReportMessageUint8(const char *s, uint8_t value)
+void report_message_uint8(const char *s, uint8_t value)
 {
 	while (*s)
 	  serial_write(*s++);
 	print_uint8_base10(value);
 }
-void ReportMessageFloat(const char *s, float value)
+void report_feedback_message_float(const char *s, float value)
 {
+	serial_write('[');
 	while (*s) 
 	  serial_write(*s++);
-	printFloat(value,2);
+	printFloat_CoordValue(value);
+	serial_write(']');
 }
 // Initializes the G33 threading pass by resetting the timer, spindle counter,
 // setting the current z-position as reference and calculating the (next) target position.
@@ -128,6 +130,6 @@ bool spindle_synchronization_active()
 // Reports synchronization error.  just for debugging or checking threading accuracy
 void report_synchronization_error()
 {
-  ReportMessageFloat("  Se:",synchronization_millimeters_error);				//report the threading position error
+  report_feedback_message_float("Se:",synchronization_millimeters_error);				//report the threading position error
   report_util_line_feed();
 }

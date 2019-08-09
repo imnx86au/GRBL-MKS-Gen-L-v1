@@ -29,9 +29,6 @@ This is the initialization routine that finally calls the endless loop protocol_
 protocol.c protocol_main_loop()
 This is the mainloop that is called at the start of the program. After some initialisation, checks prints a welcome message and starts reading and processing the serial input and calling protocol_exec_rt_system().
 
-protocol.c protocol_exec_rt_system()
-This is the code where motion and report code is executed. There are two version, one is called when GRBL is suspended! In this code the reporting of the threading state has to be implemented
-
 Report of the threading state:
 The threading state is reported when bit EXEC_SPINDLE_INDEX is set in the sys_sync_state at every spindle index pulse.
 

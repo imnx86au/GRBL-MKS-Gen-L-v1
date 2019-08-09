@@ -372,7 +372,8 @@ void report_build_info(char *line)
   serial_write('N'); // Line number reporting standard.
   serial_write('M'); // M7 mist coolant standard.
   serial_write('+'); // Safety door support standard.
-  serial_write('3'); // G33 spindle synchronization support for threading.
+  serial_write('X'); // Extended lathe command set 
+  serial_write('1'); // Extended lathe command set Version 1: G33 spindle synchronization support for threading.
   #ifdef COREXY
     serial_write('C');
   #endif
@@ -539,10 +540,13 @@ void report_realtime_status()
     printPgmString(PSTR("|FS:"));
     printFloat_RateValue(st_get_realtime_rate());
     serial_write(',');
-    //printFloat(sys.spindle_speed,N_DECIMAL_RPMVALUE);
-	if (timer_tics_passed_since_last_index_pulse()<(uint32_t) 1500000)		// Spindle speed is > 10 RPM
+	if (settings.sync_pulses_per_revolution==0) {
+      printFloat(sys.spindle_speed,N_DECIMAL_RPMVALUE);
+	} else if (timer_tics_passed_since_last_index_pulse()<(uint32_t) 1500000) {		// Spindle speed is > 10 RPM
 		printFloat(threading_index_spindle_speed,0);
-	else printFloat(0,0);
+	} else {
+		printFloat(0,0);
+	}
   #endif
 
   #ifdef REPORT_FIELD_PIN_STATE
@@ -608,7 +612,7 @@ void report_realtime_status()
   // report the synchronization state (G33) 
   if (bit_istrue(threading_exec_flags,(EXEC_SYNCHRONIZATION_STATE_REPORT))) {				// report if a report is flagged
 	  printPgmString(PSTR("|Se:"));
-	  printFloat(synchronization_millimeters_error,2);
+	  printFloat_CoordValue(synchronization_millimeters_error);								// print the synchronization error in the unit set
 	  bit_false(threading_exec_flags,EXEC_SYNCHRONIZATION_STATE_REPORT);					// clear the flag to avoid reporting the same value again
   }
   else if (bit_istrue(threading_exec_flags,EXEC_SYNCHRONIZATION_STATE_REPORT_FINAL)) {		// if a final report is flagged
