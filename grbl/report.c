@@ -540,13 +540,16 @@ void report_realtime_status()
     printPgmString(PSTR("|FS:"));
     printFloat_RateValue(st_get_realtime_rate());
     serial_write(',');
-	if (settings.sync_pulses_per_revolution==0) {
-      printFloat(sys.spindle_speed,N_DECIMAL_RPMVALUE);
-	} else if (timer_tics_passed_since_last_index_pulse()<(uint32_t) 1500000) {		// Spindle speed is > 10 RPM
-		printFloat(threading_index_spindle_speed,0);
-	} else {
-		printFloat(0,0);
-	}
+	//if (settings.sync_pulses_per_revolution==0) {
+      //printFloat(sys.spindle_speed,N_DECIMAL_RPMVALUE);
+	//} else
+	 //if (timer_tics_passed_since_last_index_pulse()<(uint32_t) 1500000) {		// Spindle speed is > 10 RPM
+		printFloat((float)threading_index_spindle_speed,0);
+	//} else {
+		//printFloat(0,0);
+	//}
+
+		//print_uint32_base10(&timer_tics_passed_since_last_index_pulse);
   #endif
 
   #ifdef REPORT_FIELD_PIN_STATE

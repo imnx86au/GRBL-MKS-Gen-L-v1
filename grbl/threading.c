@@ -91,7 +91,8 @@ void process_spindle_index_pulse()
 	threading_index_timer_tics_passed=get_timer_ticks()-threading_index_Last_timer_tics;	// Calculate the time between index pulses
 	threading_index_Last_timer_tics+=threading_index_timer_tics_passed;						// adjust for calculating the next time
 	threading_index_pulse_count++;															// Increase the pulse count
-	threading_index_spindle_speed = 15000000 / threading_index_timer_tics_passed;			// calculate the spindle speed  at this place (not in the report) reduces the CPU time because a GUI will update more frequently
+	threading_index_spindle_speed = (uint32_t)15000000 / threading_index_timer_tics_passed;			// calculate the spindle speed  at this place (not in the report) reduces the CPU time because a GUI will update more frequently
+	//threading_index_spindle_speed =  threading_index_timer_tics_passed;			// calculate the spindle speed  at this place (not in the report) reduces the CPU time because a GUI will update more frequently
 }
 
 // Processes the synchronization pulses by calculating the time between the synchronization pulses and preparing for the next pulse
