@@ -6,8 +6,8 @@
 #define MinAdc 50UL           //add dead band on start
 #define MaxAdc 975UL          //add dead band on end
 
-#define PulsesPerRevolution 4UL
-#define PulseHighMin 10UL
+#define PulsesPerRevolution 1UL
+#define PulseHighMin 20UL
 
 #define IndexPin 13
 #define SyncPin 12
@@ -100,8 +100,8 @@ void loop()
       else digitalWrite(IndexPin, LOW);         // Turn the index pin low on all other sync pulses
       digitalWrite(SyncPin, HIGH);              // Turn the sync pin high
       delay(PulseHighMin);                      // Wait for the pulse high time
-      digitalWrite(IndexPin, LOW);              // Turn the index pin Low
       digitalWrite(SyncPin, LOW);               // Turn the sync pin Low
+      digitalWrite(IndexPin, LOW);              // Turn the index pin Low
       delay(PulseTime);                         // Wait for the pulse low time
     }
 #ifdef DebugInfo
