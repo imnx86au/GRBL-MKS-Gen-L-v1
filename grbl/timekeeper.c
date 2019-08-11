@@ -26,21 +26,11 @@ void timekeeper_reset()
   }
 }
 
-uint32_t get_millis() {  //reprogram to use shift not divide
-	// each timer tick are 4 microseconds
-	return (get_timer_ticks()/(uint32_t)250);
-}
-
 uint32_t get_timer_ticks() {
   uint32_t ticks;
   ATOMIC_BLOCK(ATOMIC_RESTORESTATE){
-	 ticks = (uint32_t) TCNT5 + ((overflows)<<16);
+	 ticks = ((uint32_t) TCNT5) + (overflows<<16);
   }
   return ticks;
-}
-
-
-uint32_t calculate_dt_micros(uint32_t timer_ticks1, uint32_t timer_ticks2) {
-	return ((timer_ticks2 - timer_ticks1)*4); // TODO: test if this works even if there was a 32bit overflow between the timestamps
 }
 

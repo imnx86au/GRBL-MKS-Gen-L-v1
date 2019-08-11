@@ -68,19 +68,12 @@ void threading_reset()
 }
 
 //Returns the time in 4 useconds tics since the last index pulse
-uint32_t TimerTicsPassed(uint32_t last_tics)
-{
-	uint32_t tics;
-	ATOMIC_BLOCK(ATOMIC_RESTORESTATE){tics=get_timer_ticks()-last_tics;}				//save the current Z-axis position for calculating the actual move. Use atomic to avoid errros due to stepper updates
-  return tics;
-}
-//Returns the time in 4 useconds tics since the last index pulse
 uint32_t timer_tics_passed_since_last_index_pulse()
 {
 	uint32_t tics;
 	ATOMIC_BLOCK(ATOMIC_RESTORESTATE){tics=get_timer_ticks()-threading_index_Last_timer_tics;}				//save the current Z-axis position for calculating the actual move. Use atomic to avoid errros due to stepper updates
 	return tics;
-	}
+}
 // This routine processes the spindle index pin hit by increasing the index pulse counter and calculating the time between pulses
 // This speed is used for showing the actual spindle speed in the report
 // The not time critical processing should be handled by protocol_exec_rt_system()
@@ -91,8 +84,10 @@ void process_spindle_index_pulse()
 	threading_index_timer_tics_passed=get_timer_ticks()-threading_index_Last_timer_tics;	// Calculate the time between index pulses
 	threading_index_Last_timer_tics+=threading_index_timer_tics_passed;						// adjust for calculating the next time
 	threading_index_pulse_count++;															// Increase the pulse count
-	threading_index_spindle_speed = (uint32_t)15000000 / threading_index_timer_tics_passed;			// calculate the spindle speed  at this place (not in the report) reduces the CPU time because a GUI will update more frequently
+	threading_index_spindle_speed = ((uint32_t)15000000) / threading_index_timer_tics_passed;			// calculate the spindle speed  at this place (not in the report) reduces the CPU time because a GUI will update more frequently
 	//threading_index_spindle_speed =  threading_index_timer_tics_passed;			// calculate the spindle speed  at this place (not in the report) reduces the CPU time because a GUI will update more frequently
+	//threading_index_spindle_speed =  threading_index_pulse_count;			// calculate the spindle speed  at this place (not in the report) reduces the CPU time because a GUI will update more frequently
+	//threading_index_spindle_speed =  threading_sync_pulse_count;			// calculate the spindle speed  at this place (not in the report) reduces the CPU time because a GUI will update more frequently
 }
 
 // Processes the synchronization pulses by calculating the time between the synchronization pulses and preparing for the next pulse
@@ -128,6 +123,7 @@ bool spindle_synchronization_active()
 	if ((plan!=NULL) && (plan->condition & PL_COND_FLAG_FEED_PER_REV)) return true;
 	return false;
 }
+
 // Reports synchronization error.  just for debugging or checking threading accuracy
 void report_synchronization_error()
 {

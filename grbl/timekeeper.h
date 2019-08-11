@@ -7,10 +7,6 @@ void timekeeper_init();
 
 void timekeeper_reset();
 
-uint32_t get_millis();
-
 uint32_t get_timer_ticks();
-
-uint32_t calculate_dt_micros(uint32_t timer_ticks1, uint32_t timer_ticks2);
 
 #endif
