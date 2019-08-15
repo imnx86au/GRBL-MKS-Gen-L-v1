@@ -249,24 +249,25 @@ void protocol_exec_rt_system()
         if bit_istrue(settings.status_report_mask,BITFLAG_RT_STATUS_SYNC_STATE){			// if setting report mask is set for reporting the synchronization status in the real time status report
 	      system_set_threading_exec_flag((EXEC_SYNCHRONIZATION_STATE_REPORT | EXEC_SYNCHRONIZATION_STATE_REPORT_FINAL));	// set the reporting flags to report the synchronization status now and once when finished
 		}
-        if bit_istrue(settings.status_report_mask,BITFLAG_FEED_BACK_SYNC_STATUS){			// if setting report mask is set for reporting the synchronization error
-	      system_set_threading_exec_flag((EXEC_SYNCHRONIZATION_STATE_REPORT_ERROR));	    // set the reporting flags to report the synchronization error
+        if bit_istrue(settings.status_report_mask,BITFLAG_FEED_BACK_SYNC_STATUS){			// if setting report mask is set for synchronization error feedback
+	      system_set_threading_exec_flag((EXEC_SYNCHRONIZATION_STATE_FEEDBACK_ERROR));	    // set the reporting flags to feedback the synchronization error
 		}
 	  }
-	if (settings.sync_pulses_per_revolution==1)												// Just an index pulse, emulate the receive of a sync pulse.
-	  system_set_threading_exec_flag(EXEC_PLANNER_SYNC_PULSE);							    // emulate the receive of a synchronization pulse if there is only an index pulse, eleminates wiring if the is just a index pulse
+	  if (settings.sync_pulses_per_revolution==1)											// Just an index pulse, emulate the receive of a sync pulse.
+	    system_set_threading_exec_flag(EXEC_PLANNER_SYNC_PULSE);						    // emulate the receive of a synchronization pulse if there is only an index pulse, eliminates wiring if the is just a index pulse
 	}						
    } 
    if (bit_istrue(threading_exec_flags, EXEC_PLANNER_SYNC_PULSE)) {							// if a sync pulse was detected;
-	 process_spindle_synchronization_pulse();												// Index pulse is also used for reporting the actual spindle RPM
-     update_planner_feed_rate(); 
-     system_clear_threading_exec_flag(EXEC_PLANNER_SYNC_PULSE);
-   }
-   if (bit_istrue(threading_exec_flags,EXEC_SYNCHRONIZATION_STATE_REPORT_ERROR)){
-     report_synchronization_error();
-     system_clear_threading_exec_flag(EXEC_SYNCHRONIZATION_STATE_REPORT_ERROR);
-   }
-
+ 	 process_spindle_synchronization_pulse();												// Synchronization pulse has to be counted before G33 becomes active
+     if (spindle_synchronization_active()) {												// if spindle synchronization is active, update the planner to synchronize spindle
+       update_planner_feed_rate(); 
+       system_clear_threading_exec_flag(EXEC_PLANNER_SYNC_PULSE);
+     }
+     if (bit_istrue(threading_exec_flags,EXEC_SYNCHRONIZATION_STATE_FEEDBACK_ERROR)){
+       report_synchronization_error();
+       system_clear_threading_exec_flag(EXEC_SYNCHRONIZATION_STATE_FEEDBACK_ERROR);
+     }
+  }
   rt_exec = sys_rt_exec_state; // Copy volatile sys_rt_exec_state.
   if (rt_exec) {
     // Execute system abort.

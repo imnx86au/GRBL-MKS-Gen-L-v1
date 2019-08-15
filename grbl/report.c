@@ -540,14 +540,9 @@ void report_realtime_status()
     printPgmString(PSTR("|FS:"));
     printFloat_RateValue(st_get_realtime_rate());
     serial_write(',');
-	if (settings.sync_pulses_per_revolution==0) {
-      printFloat(sys.spindle_speed,N_DECIMAL_RPMVALUE);
-	} else
-	 if (timer_tics_passed_since_last_index_pulse()<(uint32_t) 1500000) {		// Spindle speed is > 10 RPM
-		printFloat((float)threading_index_spindle_speed,0);
-	} else {
-		printFloat(0,0);
-	}
+	if (settings.sync_pulses_per_revolution==0) { printFloat(sys.spindle_speed,N_DECIMAL_RPMVALUE); }
+	else if (timer_tics_passed_since_last_index_pulse()<(uint32_t) 1500000) {printFloat((float)threading_index_spindle_speed,0); }		// Spindle speed is > 10 RPM
+  		 else {printFloat(0,0);}
   #endif
 
   #ifdef REPORT_FIELD_PIN_STATE
@@ -616,8 +611,8 @@ void report_realtime_status()
 	  printFloat_CoordValue(synchronization_millimeters_error);								// print the synchronization error in the unit set
 	  bit_false(threading_exec_flags,EXEC_SYNCHRONIZATION_STATE_REPORT);					// clear the flag to avoid reporting the same value again
   }
-  else if (bit_istrue(threading_exec_flags,EXEC_SYNCHRONIZATION_STATE_REPORT_FINAL)) {		// if a final report is flagged
-    if (!spindle_synchronization_active()) {												// if spindle synchronization is inactive
+  else if (bit_istrue(threading_exec_flags,EXEC_SYNCHRONIZATION_STATE_REPORT_FINAL)) {		// if a final report is flagged and spindle synchronization is inactive
+    if (!spindle_synchronization_active()) {												 
 	  printPgmString(PSTR("|Se:"));															// Report report a 0 value after G33 , looks better in a GUI
 	  printFloat(0,2);																		
 	  bit_false(threading_exec_flags,EXEC_SYNCHRONIZATION_STATE_REPORT_FINAL);				// clear the flag to avoid reporting the same value again

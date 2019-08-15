@@ -181,7 +181,8 @@ void process_limit_pin_change_event()
    if (sys.state != STATE_ALARM) {
 	 if (!(sys_rt_exec_alarm)) {
 	   if (limits_get_state(LIMIT_PIN_MASK_Y_AXIS)) {	// This is the lathe version so Y-axis limit pin hits are spindle index pulses so handle them and do not reset controller
-		   system_set_threading_exec_flag(EXEC_SPINDLE_INDEX_PULSE);
+		   system_set_threading_exec_flag(EXEC_SPINDLE_INDEX_PULSE);	// pin is index pulse
+		   //system_set_threading_exec_flag(EXEC_PLANNER_SYNC_PULSE);		// pin is sync pulse
        }
       else 
         if (limits_get_state(LIMIT_PIN_MASK_ALL_EXCEPT_Y_AXIS)) { // handle all axis except the y-axis

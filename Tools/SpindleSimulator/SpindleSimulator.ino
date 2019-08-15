@@ -6,8 +6,8 @@
 #define MinAdc 50UL           //add dead band on start
 #define MaxAdc 975UL          //add dead band on end
 
-#define PulsesPerRevolution 1UL
-#define PulseHighMin 20UL
+#define PulsesPerRevolution 4UL
+#define PulseHighMin 1UL
 
 #define IndexPin 13
 #define SyncPin 12
