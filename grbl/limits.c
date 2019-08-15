@@ -117,6 +117,8 @@ void limits_disable()
 // Returns limit state as a bit-wise uint8 variable. Each bit indicates an axis limit, where 
 // triggered is 1 and not triggered is 0. Invert mask is applied. Axes are defined by their
 // number in bit position, i.e. Z_AXIS is (1<<2) or bit 2, and Y_AXIS is (1<<1) or bit 1.
+// For G33 implementation, the y-axis limit pin is used as index pulse. To avoid unwanted limit pin hits, the state of the y-axis has to be masked at some points in the code.
+// This is done by passing the pins that have to be omitted as parameter.
 uint8_t limits_get_state(uint8_t selected_pins) //
 {
   uint8_t limit_state = 0;
@@ -182,7 +184,6 @@ void process_limit_pin_change_event()
 	 if (!(sys_rt_exec_alarm)) {
 	   if (limits_get_state(LIMIT_PIN_MASK_Y_AXIS)) {	// This is the lathe version so Y-axis limit pin hits are spindle index pulses so handle them and do not reset controller
 		   system_set_threading_exec_flag(EXEC_SPINDLE_INDEX_PULSE);	// pin is index pulse
-		   //system_set_threading_exec_flag(EXEC_PLANNER_SYNC_PULSE);		// pin is sync pulse
        }
       else 
         if (limits_get_state(LIMIT_PIN_MASK_ALL_EXCEPT_Y_AXIS)) { // handle all axis except the y-axis
