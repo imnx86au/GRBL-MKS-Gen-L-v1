@@ -170,6 +170,14 @@ void report_feedback_message(uint8_t message_code)
   report_util_feedback_line_feed();
 }
 
+// Reports synchronization error feedback.  just for debugging or checking threading accuracy
+void report_synchronization_error_feedback()
+{
+	printPgmString(PSTR("[Se:"));
+	printFloat_CoordValue(synchronization_millimeters_error);
+	serial_write(']');
+	report_util_line_feed();
+}
 
 // Welcome message
 void report_init_message()
@@ -181,7 +189,6 @@ void report_init_message()
 void report_grbl_help() {
   printPgmString(PSTR("[HLP:$$ $# $G $I $N $x=val $Nx=line $J=line $SLP $C $X $H ~ ! ? ctrl-x]\r\n"));    
 }
-
 
 // Grbl global settings print out.
 // NOTE: The numbering scheme here must correlate to storing in settings.c

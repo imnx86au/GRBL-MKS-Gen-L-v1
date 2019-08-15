@@ -21,32 +21,18 @@
 #include "grbl.h"
 
 volatile uint8_t threading_exec_flags;							// Global realtime executor bitflag variable for spindle synchronization.
-volatile uint8_t threading_index_pulse_count;					// Global index pulse counter
-volatile uint8_t threading_sync_pulse_count;					// Global synchronization pulse counter
-volatile uint32_t threading_sync_Last_timer_tics;				// Time at last sync pulse
-volatile uint32_t threading_sync_timer_tics_passed;				// Time passed sync pulse
-volatile uint32_t threading_index_Last_timer_tics;				// Time at last index pulse
-volatile uint32_t threading_index_timer_tics_passed=0;	    	// Time passed index pulse
-volatile uint32_t threading_index_spindle_speed;				// The measured spindle speed used for threading
+volatile uint8_t threading_index_pulse_count;					// Global index pulse counter. Only a few pulses are needed to start looking for the first synchronization pulse, so defined as uint8
+volatile uint8_t threading_sync_pulse_count;					// Global synchronization pulse counter. Only a few pulses are needed to start G33 executing, so defined as uint8
+volatile uint32_t threading_sync_Last_timer_tics;				// Time at the last sync pulse
+volatile uint32_t threading_sync_timer_tics_passed;				// Time passed at the last sync pulse
+volatile uint32_t threading_index_Last_timer_tics;				// Time at the last index pulse
+volatile uint32_t threading_index_timer_tics_passed=0;	    	// Time passed at the last index pulse
+volatile uint32_t threading_index_spindle_speed;				// The measured spindle speed used for G33 initial speed and reporting the real spindle speed
 float threading_mm_per_synchronization_pulse;					// The factor to calculate the feed rate from the spindle speed
 volatile float threading_millimeters_target;					// The threading feed target as reported by the planner
-volatile float synchronization_millimeters_error;				// The threading feed error calculated at every synchronization pulse
-float threading_feed_rate_calculation_factor;				// factor used in plan_compute_profile_nominal_speed() and is calculated on startup for performance reasons.
+volatile float synchronization_millimeters_error;				// The synchronization feed error calculated at every synchronization pulse. It can be reported to check the threading accuracy
+float threading_feed_rate_calculation_factor;					// factor is used in plan_compute_profile_nominal_speed(), depends on the number of synchronization pulses and is calculated on startup for performance reasons.
 
-void report_message_uint8(const char *s, uint8_t value)
-{
-	while (*s)
-	  serial_write(*s++);
-	print_uint8_base10(value);
-}
-void report_feedback_message_float(const char *s, float value)
-{
-	serial_write('[');
-	while (*s) 
-	  serial_write(*s++);
-	printFloat_CoordValue(value);
-	serial_write(']');
-}
 // Initializes the G33 threading pass by resetting the timer, spindle counter,
 // setting the current z-position as reference and calculating the (next) target position.
 void threading_init(float K_value)
@@ -68,10 +54,11 @@ void threading_reset()
 }
 
 //Returns the time in 4 useconds tics since the last index pulse
+//To avoid updates while reading, it is handle atomic
 uint32_t timer_tics_passed_since_last_index_pulse()
 {
 	uint32_t tics;
-	ATOMIC_BLOCK(ATOMIC_RESTORESTATE){tics=get_timer_ticks()-threading_index_Last_timer_tics;}				//save the current Z-axis position for calculating the actual move. Use atomic to avoid errros due to stepper updates
+	ATOMIC_BLOCK(ATOMIC_RESTORESTATE){tics=get_timer_ticks()-threading_index_Last_timer_tics;}				// Use atomic to avoid errors due to timer updates
 	return tics;
 }
 // This routine processes the spindle index pin hit by increasing the index pulse counter and calculating the time between pulses
@@ -91,7 +78,6 @@ void process_spindle_index_pulse()
 }
 
 // Processes the synchronization pulses by calculating the time between the synchronization pulses and preparing for the next pulse
-//
 void process_spindle_synchronization_pulse()
 {
 	threading_sync_timer_tics_passed=get_timer_ticks()-threading_sync_Last_timer_tics;		// Calculate the time between index pulses
@@ -124,9 +110,3 @@ bool spindle_synchronization_active()
 	return false;
 }
 
-// Reports synchronization error.  just for debugging or checking threading accuracy
-void report_synchronization_error()
-{
-  report_feedback_message_float("Se:",synchronization_millimeters_error);				//report the threading position error
-  report_util_line_feed();
-}

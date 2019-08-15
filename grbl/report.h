@@ -102,6 +102,9 @@ void report_alarm_message(uint8_t alarm_code);
 // Prints miscellaneous feedback messages.
 void report_feedback_message(uint8_t message_code);
 
+// Prints the synchronization error feedback message
+void report_synchronization_error_feedback();
+
 // Prints welcome message
 void report_init_message();
 

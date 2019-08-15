@@ -1,2 +1,2 @@
 RPM measurements
-RPM measurement are wrong above 1500 RPM. Can't find why.
+RPM measurement are wrong above 1500 RPM. Can't find why but is seems conversions to int32 in stead off uint32.

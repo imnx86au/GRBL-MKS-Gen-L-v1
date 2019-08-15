@@ -36,9 +36,6 @@ extern float threading_feed_rate_calculation_factor;					// factor used in plan_
 
 void threading_init(float K_value);										//initializes the G33 threading pass using the K value set in the gcode
 uint32_t timer_tics_passed_since_last_index_pulse();
-void report_message_uint8(const char *s, uint8_t value);
-void report_feedback_message_float(const char *s, float value);
-void report_synchronization_error();
 void process_spindle_index_pulse();
 void process_spindle_synchronization_pulse();
 void update_planner_feed_rate();
