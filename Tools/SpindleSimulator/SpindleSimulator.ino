@@ -1,31 +1,29 @@
+// Program to simulate a spindel for testing lathe G33 (threading)
+// It generatates Low pulses as if NO NPN sensors where connected.
+// When no sensors are connected, all should work
+// 
+
 #define MinRPM 30UL        //   30 RPM Speed slowest
 #define MaxRPM 3000UL      // 3000 RPM Speed fastest
 
 #define PotMeter A0       //Potmeter pin, must be analog, not A4 or A5 on arduino (SDA SCL)
-//#define AverageCount 10
 #define MinAdc 50UL           //add dead band on start
 #define MaxAdc 975UL          //add dead band on end
 
 #define PulsesPerRevolution 4UL
-#define PulseHighMin 1UL
+#define PulseLowMin 1UL
 
 #define IndexPin 13
 #define SyncPin 12
 
 //#define DebugInfo
-//define one or none of the fixed speed simulation setting
+//define one of the fixed speed simulation setting or define none and use a potmeter connected to A0
 //#define FixSpeed30RPM
 //#define FixSpeed120RPM
 //#define FixSpeed600RPM
 
 int ReadPotmeter()
 {
-  //  int Sum = 0;
-  //  for (int i = 0; i < AverageCount; i++)
-  //  {
-  //    Sum += analogRead(PotMeter);
-  //  }
-  //  return Sum / AverageCount;
   return analogRead(PotMeter);
 }
 
@@ -77,6 +75,19 @@ void setup()
   pinMode(SyncPin, OUTPUT);     // Initialize the  pin as aput
 }
 
+int GetPulseTime()
+{
+#if defined FixSpeed30RPM
+  return MapRPMtoDelay(30);
+#elif defined FixSpeed120RPM
+  return MapRPMtoDelay(120);
+#elif defined FixSpeed600RPM
+  return MapRPMToDelay(600);
+#else
+  return MapPotToDelay(ReadPotmeter());
+#endif 
+}
+
 void loop()
 {
   int PulseTime;
@@ -86,22 +97,14 @@ void loop()
   {
     for (int i = 0; i < PulsesPerRevolution; i++)
     {
-      PulseTime = MapPotToDelay(ReadPotmeter());
-      // if a fixed RPM is selecte, set speed accordinly
-#if defined (FixSpeed30RPM)
-      PulseTime = MapRPMtoDelay(30);
-#elif defined FixSpeed120RPM
-      PulseTime = MapRPMtoDelay(120);
-#elif defined FixSpeed600RPM
-      PulseTime = MapRPMToDelay(600);
-#endif
-      PulseTime -= PulseHighMin;
-      if (i == 0) digitalWrite(IndexPin, HIGH); // Turn the index pin high on the first sync pulse
-      else digitalWrite(IndexPin, LOW);         // Turn the index pin low on all other sync pulses
-      digitalWrite(SyncPin, HIGH);              // Turn the sync pin high
-      delay(PulseHighMin);                      // Wait for the pulse high time
-      digitalWrite(SyncPin, LOW);               // Turn the sync pin Low
-      digitalWrite(IndexPin, LOW);              // Turn the index pin Low
+      PulseTime = GetPulseTime();
+      PulseTime -= PulseLowMin;
+      if (i == 0) digitalWrite(IndexPin, LOW); // Turn the index pin high on the first sync pulse
+      else digitalWrite(IndexPin, HIGH);         // Turn the index pin low on all other sync pulses
+      digitalWrite(SyncPin, LOW);              // Turn the sync pin high
+      delay(PulseLowMin);                      // Wait for the pulse high time
+      digitalWrite(SyncPin, HIGH);               // Turn the sync pin Low
+      digitalWrite(IndexPin, HIGH);              // Turn the index pin Low
       delay(PulseTime);                         // Wait for the pulse low time
     }
 #ifdef DebugInfo
