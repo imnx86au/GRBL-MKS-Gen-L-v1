@@ -18,4 +18,5 @@ Added counting and reporting Index and Sync pulses GRBL-L-Mega reported by ardui
 Added G33 complete, working and tested reported by arduino 32506 / 3444
 				Program Memory Usage 	:	35358 bytes   13,5 % Full
 				Data Memory Usage 		:	3441 bytes   42,0 % Full
-All coding done, working and tested reported by arduino 32544 / 3428
+All coding done, cleanedup, working and tested reported by arduino 32444 / 3314
+
