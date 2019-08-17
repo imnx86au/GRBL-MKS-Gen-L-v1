@@ -75,6 +75,11 @@ void protocol_main_loop()
 
     // Process one line of incoming serial data, as the data becomes available. Performs an
     // initial filtering by removing spaces and comments and capitalizing all letters.
+	// During spindle synchronization (G33) no further lines are processed to keep updating the planner as fast as possible
+	// Doing this, only 1 command will be in the planner buffer. this will shorten the time to execute the speed synchronization
+	// and will allow calling the speed synchronization routine at the receive of an interrupt
+	// Real time commands like abort and hold are still processed
+	if (!spindle_synchronization_active()) {	
     while((c = serial_read()) != SERIAL_NO_DATA) {
       if ((c == '\n') || (c == '\r')) { // End of line reached
 
@@ -150,7 +155,7 @@ void protocol_main_loop()
 
       }
     }
-
+	}
     // If there are no more characters in the serial read buffer to be processed and executed,
     // this indicates that g-code streaming has either filled the planner buffer or has
     // completed. In either case, auto-cycle start, if enabled, any queued moves.
@@ -194,7 +199,6 @@ void protocol_auto_cycle_start()
     system_set_exec_state_flag(EXEC_CYCLE_START); // If so, execute them!
   }
 }
-
 
 // This function is the general interface to Grbl's real-time command execution system. It is called
 // from various check points in the main program, primarily where there may be a while loop waiting
@@ -254,21 +258,20 @@ void protocol_exec_rt_system()
 	      system_set_threading_exec_flag((EXEC_SYNCHRONIZATION_STATE_FEEDBACK_ERROR));	    // set the reporting flags to feedback the synchronization error
 		}
 	  }
-	  if (settings.sync_pulses_per_revolution==1)											// Just an index pulse, emulate the receive of a sync pulse.
+	  if (settings.sync_pulses_per_revolution==1) {											// Just an index pulse, emulate the receive of a sync pulse.
 	    system_set_threading_exec_flag(EXEC_PLANNER_SYNC_PULSE);						    // emulate the receive of a synchronization pulse if there is only an index pulse, eliminates wiring if the is just a index pulse
+	  }
 	}						
-   } 
-   if (bit_istrue(threading_exec_flags, EXEC_PLANNER_SYNC_PULSE)) {							// if a sync pulse was detected;
- 	 process_spindle_synchronization_pulse();												// Synchronization pulse has to be counted before G33 becomes active
-     if (spindle_synchronization_active()) {												// if spindle synchronization is active, update the planner to synchronize spindle
-       update_planner_feed_rate(); 
-       system_clear_threading_exec_flag(EXEC_PLANNER_SYNC_PULSE);
-     }
-     if (bit_istrue(threading_exec_flags,EXEC_SYNCHRONIZATION_STATE_FEEDBACK_ERROR)){
-       report_synchronization_error_feedback();
-       system_clear_threading_exec_flag(EXEC_SYNCHRONIZATION_STATE_FEEDBACK_ERROR);
-     }
+  } 
+  if (bit_istrue(threading_exec_flags, EXEC_PLANNER_SYNC_PULSE)) {							// if a sync pulse was detected;
+	  process_spindle_synchronization_pulse();												// Synchronization pulse has to be counted before G33 becomes active
+	  if (spindle_synchronization_active()) {update_planner_feed_rate();}		    		// if spindle synchronization is active, update the planner to synchronize spindle
+	  system_clear_threading_exec_flag(EXEC_PLANNER_SYNC_PULSE);
   }
+  if (bit_istrue(threading_exec_flags,EXEC_SYNCHRONIZATION_STATE_FEEDBACK_ERROR)){
+    report_synchronization_error_feedback();
+    system_clear_threading_exec_flag(EXEC_SYNCHRONIZATION_STATE_FEEDBACK_ERROR);
+  }  
   rt_exec = sys_rt_exec_state; // Copy volatile sys_rt_exec_state.
   if (rt_exec) {
     // Execute system abort.
