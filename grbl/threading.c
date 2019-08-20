@@ -62,35 +62,25 @@ uint32_t timer_tics_passed_since_last_index_pulse()
 	return tics;
 }
 // This routine processes the spindle index pin hit by increasing the index pulse counter and calculating the time between pulses
-// This speed is used for showing the actual spindle speed in the report
-// The not time critical processing should be handled by protocol_exec_rt_system()
-// This is signaled by the EXEC_SPINDLE_INDEX flag
-// The Z-axis feedrate is synchronized by calling update_planner_feed_rate() when SPINDLE_SYNC_PULSES_PER_ROTATION==1 otherwise this is handled by the synchronization puls event
+// This calculated spindle speed is used for showing the actual spindle speed in the report
 void process_spindle_index_pulse()
 {
-	threading_index_timer_tics_passed=get_timer_ticks()-threading_index_Last_timer_tics;	// Calculate the time between index pulses
-	threading_index_Last_timer_tics+=threading_index_timer_tics_passed;						// adjust for calculating the next time
-	threading_index_pulse_count++;															// Increase the pulse count
-	threading_index_spindle_speed = ((uint32_t)15000000) / threading_index_timer_tics_passed;			// calculate the spindle speed  at this place (not in the report) reduces the CPU time because a GUI will update more frequently
-	//threading_index_spindle_speed =  threading_index_timer_tics_passed;			// calculate the spindle speed  at this place (not in the report) reduces the CPU time because a GUI will update more frequently
-	//threading_index_spindle_speed =  threading_index_pulse_count;			// calculate the spindle speed  at this place (not in the report) reduces the CPU time because a GUI will update more frequently
-	//threading_index_spindle_speed =  threading_sync_pulse_count;			// calculate the spindle speed  at this place (not in the report) reduces the CPU time because a GUI will update more frequently
+	threading_index_timer_tics_passed=get_timer_ticks()-threading_index_Last_timer_tics;		// Calculate the time between index pulses
+	threading_index_Last_timer_tics+=threading_index_timer_tics_passed;							// adjust for calculating the next time
+	threading_index_pulse_count++;																// Increase the pulse count
+	threading_index_spindle_speed = ((uint32_t)15000000) / threading_index_timer_tics_passed;	// calculate the spindle speed  at this place (not in the report) reduces the CPU time because a GUI will update more frequently
 }
 
-// Processes the synchronization pulses by calculating the time between the synchronization pulses and preparing for the next pulse
+// Processes the synchronization pulses by increasing the synchronization counter and calculating the time between the synchronization pulses
 void process_spindle_synchronization_pulse()
 {
-	threading_sync_timer_tics_passed=get_timer_ticks()-threading_sync_Last_timer_tics;		// Calculate the time between index pulses
+	threading_sync_timer_tics_passed=get_timer_ticks()-threading_sync_Last_timer_tics;		// Calculate the time between synchronization pulses
 	threading_sync_timer_tics_passed+=threading_sync_timer_tics_passed;						// adjust for calculating the next time
 	threading_sync_pulse_count++;															// Increase the synchronization pulse count
 }
 
-// This routine does all processing needed to keep the Z-axis in sync with the spindle during a threading pass G33
+// This routine does the processing needed to keep the Z-axis in sync with the spindle during a threading pass G33
 // This is done only, if the current planner block is a G33 motion indicated by the planner condition PL_COND_FLAG_FEED_PER_REV
-// It saves the current Z-axis position
-// Calculates the target Z-axis position at the next sync pulse
-// Calculates the feed rate needed to be at this position (neglecting acceleration time)
-// Sets this feed rate for the current block in the planner
 // Recalculates the feed rates for all the blocks in the planner as if a new block was added to the planner que
 // If the current block isn't a G33 motion, the synchronization_millimeters_error will be set to zero
 void update_planner_feed_rate() {
