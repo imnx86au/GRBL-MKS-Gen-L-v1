@@ -58,40 +58,5 @@ This is where all not event driven code has to be executed. All event (interrupt
 This means the interrupt handler should be as lean as possible and don't execute code than can be executed outside the event handler.
 Example: PCINT2 handles the Spindle Index pulse by calling process_limit_pin_change_event() who sets bit EXEC_SPINDLE_INDEX_PULSE in threading_exec_flags to signalling protocol_exec_rt_system() to handle it.
 
-Implement G33 Gcode
-done copy G1 to G33
-* Change G33 to hold processing until the receiving of 4 index pulses
-* Change G33 to hold processing until the planner buffer is empty
-* Change G33 to set speed before starting
-* Change G33 to accept K parameter
-* Change G33 to reject F parameter 
-* Change G33 to start using the right feedrate 
-* Change to update G33 block feedrate at every index pulse
-* Change to update G33 block feedrate at every sync pulse
-* use the time keeper to set the spindle speed to zero when no more index pulses are recieved
-replace K value to xyx.k value
-test G33 in inches
-set sync pulses per revolution by grbl setting
-done i guesss 
-
-Example fschill
-G0 X1 Z0 ; go to start position
-G95 ; Feed per revolution mode
-G0 X-0.5 ; go to cutting depth, clear of workpiece
-G4 P1 ; Dwell and wait for spindle sync (in G95 mode)
-G1 F1 Z-20 ; start threading pass
-G0X1 ; retract at end of move
-Z0 ; end of pass
-
-Alternative make G33 implementation
-G90 (absolute distance mode)
-G0 X1 Z0.1 (rapid to position)
-S100 M3 (start spindle turning)
-G33 Z-2 K0.125 (move Z axis to -2 at a rate to equal 0.125 per revolution)
-G0 X1.25 (rapid move tool away from work)
-Z0.1 (rapid move to starting Z position)
-M2 (end program)
-
 G33 equals G1 except for waiting for a spindle sync and the speed has to be calculated and synchronized, like G1
 
-G90 G33 Z-20 K1

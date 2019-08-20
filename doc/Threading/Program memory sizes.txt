@@ -19,4 +19,5 @@ Added G33 complete, working and tested reported by arduino 32506 / 3444
 				Program Memory Usage 	:	35358 bytes   13,5 % Full
 				Data Memory Usage 		:	3441 bytes   42,0 % Full
 All coding done, cleanedup, working and tested reported by arduino 32384 / 3314
+Release 20190820 reported by arduino 32424 / 3314
 

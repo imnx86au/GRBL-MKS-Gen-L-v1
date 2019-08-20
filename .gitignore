@@ -8,3 +8,8 @@
 *.map~Added measuring tics between sync pulses
 *.cproj~Added measuring tics between sync pulses
 Debug/Makefile~Added measuring tics between sync pulses
+*.map
+Debug/Makefile
+Debug/makedep.mk
+GRBL-L-Mega.cproj
+GRBL-L-Mega.cproj.vspscc
