@@ -14,3 +14,4 @@ build
 doc/Threading/Program memory sizes.txt
 doc/Threading/Program memory sizes.txt
 doc/Threading/Grbl program analisys.txt
+GRBL-L-Mega.cproj~Added measuring tics between sync pulses
