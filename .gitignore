@@ -5,3 +5,9 @@
 *.d
 
 README.md
+vssver2.scc
+GRBL-L-Mega.cproj~Added measuring tics between sync pulses
+GRBL-L-Mega.componentinfo.xml
+Debug/Makefile~Added measuring tics between sync pulses
+Debug/makedep.mk~Added measuring tics between sync pulses
+Debug/GRBL-L-Mega.map~Added measuring tics between sync pulses
