@@ -4,6 +4,7 @@
 
   Copyright (c) 2012-2016 Sungeun K. Jeon for Gnea Research LLC
   Copyright (c) 2009-2011 Simen Svale Skogsrud
+  modified for use on a lathe, 2019 Huub Buis
 
   Grbl is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -27,8 +28,26 @@
 
 #ifndef config_h
 #define config_h
+
+
 #include "grbl.h" // For Arduino IDE compatibility.
 
+//Define for use on a lathe, enabled by default because this is a GRBL lathe version
+#define LIMIT_PIN_MASK_Y_AXIS 2					//Y-Axis pin
+#define LIMIT_PIN_MASK_ALL	7					//All pins
+#define LIMIT_PIN_MASK_ALL_EXCEPT_Y_AXIS 5		//All pins except Y-Axis pin
+
+#define SPINDLE_INDEX_PULSES_BEFORE_START_G33 3
+#define INDEX_PULSE_TIMEOUT_TICS 1500000U //6 seconds between index pulses, 10 RPM, every tic is 4 us
+
+// If you have a USB to serial (HC04) or Wifi (ESP8266) to serial adapter connected, you have to disconnect this adapter before flashing GRBL. 
+// To avoid this, connect the adapter to serial port 1,2 or 3 and tell grbl to use this serial port.
+// You can than flash using the USB port connected to USART0 and communicate to grbl by an other serial port.
+//  Define the serial port to use, the mega2560 has four (USART0 .. USART3) usart0 is the default. Uncomment just one
+//#define SERIAL0		//uncomment to use USART0 TX0/RX0 (default) 
+//#define SERIAL1		//uncomment to use USART1 TX1/RX1 
+//#define SERIAL2		//uncomment to use USART2 TX2/RX2 
+#define SERIAL3			//uncomment to use USART3 TX3/RX3
 
 // Define CPU pin map and default settings.
 // NOTE: OEMs can avoid the need to maintain/update the defaults.h and cpu_map.h files and use only
@@ -106,15 +125,8 @@
 // on separate pin, but homed in one cycle. Also, it should be noted that the function of hard limits
 // will not be affected by pin sharing.
 // NOTE: Defaults are set for a traditional 3-axis CNC machine. Z-axis first to clear, followed by X & Y.
-#ifdef DEFAULTS_RAMPS_BOARD
-  #define HOMING_CYCLE_0 (1<<X_AXIS)   // Home X axis
-  #define HOMING_CYCLE_1 (1<<Y_AXIS)   // Home Y axis
-  #define HOMING_CYCLE_2 (1<<Z_AXIS)   // OPTIONAL: Home Z axis 
-#else
-  #define HOMING_CYCLE_0 (1<<X_AXIS)  // REQUIRED: First move X (Lathe)
-  #define HOMING_CYCLE_1 (1<<Z_AXIS)  // OPTIONAL: Then move Z (Lathe)
-  // #define HOMING_CYCLE_2                         // OPTIONAL: Uncomment and add axes mask to enable
-#endif // DEFAULTS_RAMPS_BOARD
+#define HOMING_CYCLE_0 (1<<X_AXIS)  // REQUIRED: First move X (Lathe)
+#define HOMING_CYCLE_1 (1<<Z_AXIS)  // OPTIONAL: Then move Z (Lathe)
 
 // NOTE: The following are two examples to setup homing for 2-axis machines.
 // #define HOMING_CYCLE_0 ((1<<X_AXIS)|(1<<Y_AXIS))  // NOT COMPATIBLE WITH COREXY: Homes both X-Y in one cycle. 
@@ -131,7 +143,7 @@
 // cycle is still invoked by the $H command. This is disabled by default. It's here only to address
 // users that need to switch between a two-axis and three-axis machine. This is actually very rare.
 // If you have a two-axis machine, DON'T USE THIS. Instead, just alter the homing cycle for two-axes.
-#define HOMING_SINGLE_AXIS_COMMANDS // Default disabled. Uncomment to enable.
+#define HOMING_SINGLE_AXIS_COMMANDS // On a Lathe, homing single axis can be useful
 
 // After homing, Grbl will set by default the entire machine space into negative space, as is typical
 // for professional CNC machines, regardless of where the limit switches are located. Uncomment this
@@ -167,7 +179,7 @@
 // Upon a successful probe cycle, this option provides immediately feedback of the probe coordinates
 // through an automatically generated message. If disabled, users can still access the last probe
 // coordinates through Grbl '$#' print parameters.
-#define MESSAGE_PROBE_COORDINATES // Enabled by default. Comment to disable.
+//#define MESSAGE_PROBE_COORDINATES // disabled by default. Comment to disable when LATHE is defined.
 
 // This option causes the feed hold input to act as a safety door switch. A safety door, when triggered,
 // immediately forces a feed hold and then safely de-energizes the machine. Resuming is blocked until
@@ -282,7 +294,7 @@
 // the associated data is refreshed and included in the status report. However, if one of these value
 // changes, Grbl will automatically include this data in the next status report, regardless of what the
 // count is at the time. This helps reduce the communication overhead involved with high frequency reporting
-// and agressive streaming. There is also a busy and an idle refresh count, which sets up Grbl to send
+// and aggressive streaming. There is also a busy and an idle refresh count, which sets up Grbl to send
 // refreshes more often when its not doing anything important. With a good GUI, this data doesn't need
 // to be refreshed very often, on the order of a several seconds.
 // NOTE: WCO refresh must be 2 or greater. OVR refresh must be 1 or greater.
@@ -357,7 +369,7 @@
 // With this enabled, Grbl sends back an echo of the line it has received, which has been pre-parsed (spaces
 // removed, capitalized letters, no comments) and is to be immediately executed by Grbl. Echoes will not be
 // sent upon a line buffer overflow, but should for all normal lines sent to Grbl. For example, if a user
-// sendss the line 'g1 x1.032 y2.45 (test comment)', Grbl will echo back in the form '[echo: G1X1.032Y2.45]'.
+// sends the line 'g1 x1.032 y2.45 (test comment)', Grbl will echo back in the form '[echo: G1X1.032Y2.45]'.
 // NOTE: Only use this for debugging purposes!! When echoing, this takes up valuable resources and can effect
 // performance. If absolutely needed for normal operation, the serial write buffer should be greatly increased
 // to help minimize transmission waiting within the serial write protocol.
@@ -416,7 +428,7 @@
 // available RAM, like when re-compiling for a Mega or Sanguino. Or decrease if the Arduino
 // begins to crash due to the lack of available RAM or if the CPU is having trouble keeping
 // up with planning new incoming motions as they are executed. 
-// #define BLOCK_BUFFER_SIZE 36  // Uncomment to override default in planner.h.
+#define BLOCK_BUFFER_SIZE 34  // Uncomment to override default in planner.h.
 
 // Governs the size of the intermediary step segment buffer between the step execution algorithm
 // and the planner blocks. Each segment is set of steps executed at a constant velocity over a
@@ -434,7 +446,7 @@
 // can be too small and g-code blocks can get truncated. Officially, the g-code standards
 // support up to 256 characters. In future versions, this default will be increased, when
 // we know how much extra memory space we can re-invest into this.
-// #define LINE_BUFFER_SIZE 256  // Uncomment to override default in protocol.h
+ //#define LINE_BUFFER_SIZE 128 // Uncomment to override default in protocol.h
   
 // Serial send and receive buffer size. The receive buffer is often used as another streaming
 // buffer to store incoming blocks to be processed by Grbl when its ready. Most streaming
@@ -469,7 +481,7 @@
 // electrical interference on the signal cables from external sources. It's recommended to first
 // use shielded signal cables with their shielding connected to ground (old USB/computer cables 
 // work well and are cheap to find) and wire in a low-pass circuit into each limit pin.
-#define ENABLE_SOFTWARE_DEBOUNCE // Default disabled. Uncomment to enable.
+#define ENABLE_SOFTWARE_DEBOUNCE // Default enabled for the lathe
 
 // Configures the position after a probing cycle during Grbl's check mode. Disabled sets
 // the position to the probe target, when enabled sets the position to the start position.
@@ -483,7 +495,8 @@
 // that the switches don't bounce, we recommend enabling this option. This will help prevent
 // triggering a hard limit when the machine disengages from the switch.
 // NOTE: This option has no effect if SOFTWARE_DEBOUNCE is enabled.
-// #define HARD_LIMIT_FORCE_STATE_CHECK // Default disabled. Uncomment to enable.
+// This option is disabled in the GRBL-L versions to safe coe
+// #define HARD_LIMIT_FORCE_STATE_CHECK // Default disabled. Uncomment to enable. 
 
 // Adjusts homing cycle search and locate scalars. These are the multipliers used by Grbl's
 // homing cycle to ensure the limit switches are engaged and cleared through each phase of

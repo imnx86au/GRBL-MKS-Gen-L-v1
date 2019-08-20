@@ -28,9 +28,7 @@
 
 #ifdef CPU_MAP_2560_INITIAL // (Arduino Mega 2560) Working @EliteEng
 
-  // Serial port interrupt vectors
-  #define SERIAL_RX USART0_RX_vect
-  #define SERIAL_UDRE USART0_UDRE_vect
+  // Serial port configuration is moved to config.h
 
   // Define step pulse output pins. NOTE: All step bit pins must be on the same port.
   #define STEP_DDR      DDRA
@@ -62,7 +60,7 @@
   #define LIMIT_PORT      PORTB
   #define LIMIT_PIN       PINB
   #define X_LIMIT_BIT     4 // MEGA2560 Digital Pin 10
-  #define Y_LIMIT_BIT     5 // MEGA2560 Digital Pin 11
+  #define Y_LIMIT_BIT     5 // MEGA2560 Digital Pin 11 (5) // MEGA2560 Digital Pin 53 / SS (0)
   #define Z_LIMIT_BIT     6 // MEGA2560 Digital Pin 12
   #define LIMIT_INT       PCIE0  // Pin change interrupt enable pin
   #define LIMIT_INT_vect  PCINT0_vect 
@@ -85,7 +83,7 @@
   #define COOLANT_MIST_PORT   PORTH
   #define COOLANT_MIST_BIT    6 // MEGA2560 Digital Pin 9
 
-  // Define user-control CONTROLs (cycle start, reset, feed hold) input pins.
+  // Define user-control CONTROLs (cycle start, reset, feed hold) input pins. and the spindle synchronization pin
   // NOTE: All CONTROLs pins must be on the same port and not on a port with other input pins (limits).
   #define CONTROL_DDR       DDRK
   #define CONTROL_PIN       PINK
@@ -94,18 +92,19 @@
   #define CONTROL_FEED_HOLD_BIT     1  // MEGA2560 Analog Pin 9
   #define CONTROL_CYCLE_START_BIT   2  // MEGA2560 Analog Pin 10
   #define CONTROL_SAFETY_DOOR_BIT   3  // MEGA2560 Analog Pin 11
+  #define CONTROL_SPINDLE_SYNC_BIT  7  // MEGA2560 Analog Pin 15, same as probe pin
   #define CONTROL_INT       PCIE2  // Pin change interrupt enable pin
   #define CONTROL_INT_vect  PCINT2_vect
   #define CONTROL_PCMSK     PCMSK2 // Pin change interrupt register
-  #define CONTROL_MASK      ((1<<CONTROL_RESET_BIT)|(1<<CONTROL_FEED_HOLD_BIT)|(1<<CONTROL_CYCLE_START_BIT)|(1<<CONTROL_SAFETY_DOOR_BIT))
-
-  // Define probe switch input pin.
+  #define CONTROL_MASK      ((1<<CONTROL_RESET_BIT)|(1<<CONTROL_FEED_HOLD_BIT)|(1<<CONTROL_CYCLE_START_BIT)|(1<<CONTROL_SAFETY_DOOR_BIT)|(1<<CONTROL_SPINDLE_SYNC_BIT))
+  
+  // Define probe switch input pin.   is the same as the spindle synchronization pin
   #define PROBE_DDR       DDRK
   #define PROBE_PIN       PINK
   #define PROBE_PORT      PORTK
   #define PROBE_BIT       7  // MEGA2560 Analog Pin 15
   #define PROBE_MASK      (1<<PROBE_BIT)
-
+ 
   // Advanced Configuration Below You should not need to touch these variables
   // Set Timer up to use TIMER4B which is attached to Digital Pin 7
   #define SPINDLE_PWM_MAX_VALUE     1024.0 // Translates to about 1.9 kHz PWM frequency at 1/8 prescaler
@@ -135,10 +134,8 @@
 #ifdef CPU_MAP_2560_RAMPS_BOARD // (Arduino Mega 2560) with Ramps 1.4 Board
   #include "nuts_bolts.h"
 
-  // Serial port interrupt vectors
-  #define SERIAL_RX USART0_RX_vect
-  #define SERIAL_UDRE USART0_UDRE_vect
-  
+  // Serial port configuration is moved to config.h
+    
   // Define ports and pins
   #define DDR(port) DDR##port
   #define _DDR(port) DDR(port)
@@ -213,10 +210,7 @@
   #define MAX_LIMIT_PORT(i) _PORT(MAX_LIMIT_PORT_##i)
   #define MAX_LIMIT_PIN(i) _PIN(MAX_LIMIT_PORT_##i)
 
-  //  #define LIMIT_INT       PCIE0  // Pin change interrupt enable pin
-  //  #define LIMIT_INT_vect  PCINT0_vect 
-  //  #define LIMIT_PCMSK     PCMSK0 // Pin change interrupt register
-  //  #define LIMIT_MASK ((1<<X_LIMIT_BIT)|(1<<Y_LIMIT_BIT)|(1<<Z_LIMIT_BIT)) // All limit bits
+  // Disable the hardware limits
   #define DISABLE_HW_LIMITS
 
   // Define spindle enable and spindle direction output pins.
@@ -244,11 +238,12 @@
   #define CONTROL_FEED_HOLD_BIT     2  // Pin A10 - RAMPS Aux 2 Port
   #define CONTROL_CYCLE_START_BIT   3  // Pin A11 - RAMPS Aux 2 Port
   #define CONTROL_SAFETY_DOOR_BIT   4  // Pin A12 - RAMPS Aux 2 Port
+  #define CONTROL_SPINDLE_SYNC_BIT  7  // MEGA2560 Analog Pin 15, same as probe pin
   #define CONTROL_INT       PCIE2  // Pin change interrupt enable pin
   #define CONTROL_INT_vect  PCINT2_vect
   #define CONTROL_PCMSK     PCMSK2 // Pin change interrupt register
-  #define CONTROL_MASK      ((1<<CONTROL_RESET_BIT)|(1<<CONTROL_FEED_HOLD_BIT)|(1<<CONTROL_CYCLE_START_BIT)|(1<<CONTROL_SAFETY_DOOR_BIT))
-
+  #define CONTROL_MASK      ((1<<CONTROL_RESET_BIT)|(1<<CONTROL_FEED_HOLD_BIT)|(1<<CONTROL_CYCLE_START_BIT)|(1<<CONTROL_SAFETY_DOOR_BIT)|(1<<CONTROL_SPINDLE_SYNC_BIT))
+ 
   // Define probe switch input pin.
   #define PROBE_DDR       DDRK
   #define PROBE_PIN       PINK

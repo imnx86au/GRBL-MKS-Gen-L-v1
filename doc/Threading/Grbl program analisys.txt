@@ -1,0 +1,97 @@
+
+/*
+ * Grbl_program_analisys.txt
+ *
+ * Created: 30-6-2019 12:28:28
+ *  Author: hfjbu
+ */ 
+
+system.h
+In this file all (global) masks and structures are defined
+
+Limits.c  ISR(LIMIT_INT_vect)
+This routine handles the hardware limit triggers. It calls limits_get_state() to check if a limit switch is hit. limits_get_state() has to be modified to disable hardware limits on Y-asix
+
+Limits.c limits_get_state()
+This routine checks for limit switch triggers. It is also used for homing.
+To disable hardware limit on Y-axis, the Y-axis state has be to filtered out except when homing. During homing the sys.state is set to STATE_HOMING and this can be used to decide to filter out the y-axis limit switch
+The index of the Y-axis it set in Y_AXIS. To disable the check test on STATE_HOMING and if not, clear the Y_AXIS bit in pin change state!
+
+report.c report_realtime_status()
+This routine reports the current grbl state.
+
+The Probe pin is connected to Pin A15 on the arduino Mega. Its pin change interrupt is handled by PCI2, that handles all pin change interrupts on Pin A8..A15, like safetydoor and cycle start. 
+system.c ISR(CONTROL_INT_vect) must handle the synchronisation pulses interrupts.
+
+main.c
+This is the initialization routine that finally calls the endless loop protocol_main_loop();
+
+protocol.c protocol_main_loop()
+This is the mainloop that is called at the start of the program. After some initialisation, checks prints a welcome message and starts reading and processing the serial input and calling protocol_exec_rt_system().
+
+Report of the threading state:
+The threading state is reported when bit EXEC_SPINDLE_INDEX is set in the sys_sync_state at every spindle index pulse.
+
+Synchronize of the threading Z-speed
+The threading Z-speed is synchronized when bit EXEC_SPINDLE_SYNC is set in the sys_sync_state at every spindle index pulse.
+
+Status report
+Report settings are set in settings.status_report_mask. Currently bit 0 (buffer size) and 1 (report machine positions) are set.
+Add bit7 to report the threading accuracy on every index pulse
+Add bit6 to report spindle speed in realtime status update
+
+Serial communication
+Some registers are defined in cpu_map.h but most registers are named in serial.c Going to change registers by defines to select between serial1 or serial2 to allow flashing and testing without changing wiring or settings.
+serial_init() ISR(SERIAL_UDRE) ISR(SERIAL_RX) serial_write
+
+Gcode.C
+This is where the normal (not real time) Gcode commands are analyzed 
+
+Motion_control.c mc_line()
+This is where absolute liniair motions are added to the planner. G33 can start after the planner buffer is empty, there are 3 spindle index pulses and the inital speed is set.
+If there are also spindle synchronization pulses (SPINDLE_SYNC_PULSES_PER_REVOLUTION > 1), waiting for the next synchronization pulse has to be done. It is a requirement that the spindle synchronization pulse, 
+followes the index pulse by some distance to avoid just missing the synchronizaton pulse. It is best to place the spindle index pulse in the mid of 2 synchronization pulses.
+Here we have to change the routine!
+
+Protocol.c protocol_exec_rt_system()
+This is where all not event driven code has to be executed. All event (interrupt) driven code has to signal protocol_exec_rt_system() to do some thing.
+This means the interrupt handler should be as lean as possible and don't execute code than can be executed outside the event handler.
+Example: PCINT2 handles the Spindle Index pulse by calling process_limit_pin_change_event() who sets bit EXEC_SPINDLE_INDEX_PULSE in threading_exec_flags to signalling protocol_exec_rt_system() to handle it.
+
+Implement G33 Gcode
+done copy G1 to G33
+* Change G33 to hold processing until the receiving of 4 index pulses
+* Change G33 to hold processing until the planner buffer is empty
+* Change G33 to set speed before starting
+* Change G33 to accept K parameter
+* Change G33 to reject F parameter 
+* Change G33 to start using the right feedrate 
+* Change to update G33 block feedrate at every index pulse
+* Change to update G33 block feedrate at every sync pulse
+* use the time keeper to set the spindle speed to zero when no more index pulses are recieved
+replace K value to xyx.k value
+test G33 in inches
+set sync pulses per revolution by grbl setting
+done i guesss 
+
+Example fschill
+G0 X1 Z0 ; go to start position
+G95 ; Feed per revolution mode
+G0 X-0.5 ; go to cutting depth, clear of workpiece
+G4 P1 ; Dwell and wait for spindle sync (in G95 mode)
+G1 F1 Z-20 ; start threading pass
+G0X1 ; retract at end of move
+Z0 ; end of pass
+
+Alternative make G33 implementation
+G90 (absolute distance mode)
+G0 X1 Z0.1 (rapid to position)
+S100 M3 (start spindle turning)
+G33 Z-2 K0.125 (move Z axis to -2 at a rate to equal 0.125 per revolution)
+G0 X1.25 (rapid move tool away from work)
+Z0.1 (rapid move to starting Z position)
+M2 (end program)
+
+G33 equals G1 except for waiting for a spindle sync and the speed has to be calculated and synchronized, like G1
+
+G90 G33 Z-20 K1

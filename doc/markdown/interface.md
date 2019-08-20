@@ -103,6 +103,7 @@ In v1.1, Grbl's interface protocol has been tweaked in the attempt to make GUI d
 	- `ALARM:x` : Indicates an alarm has been thrown. Grbl is now in an alarm state.	
 	- `$x=val` and `$Nx=line` indicate a settings printout from a `$` and `$N` user query, respectively.
 	- `[MSG:]` : Indicates a non-queried feedback message.
+	- `[Se:]` : Indicates a non-queried synchronization error feedback message during G33 moves.
 	- `[GC:]` : Indicates a queried `$G` g-code state message.
 	- `[HLP:]` : Indicates the help message.
 	- `[G54:]`, `[G55:]`, `[G56:]`, `[G57:]`, `[G58:]`, `[G59:]`, `[G28:]`, `[G30:]`, `[G92:]`, `[TLO:]`, and `[PRB:]` messages indicate the parameter data printout from a `$#` user query.
@@ -155,6 +156,8 @@ Every G-code block sent to Grbl and Grbl `$` system command that is terminated w
 | **`15`** | Jog target exceeds machine travel. Command ignored. |
 | **`16`** | Jog command with no '=' or contains prohibited g-code. |
 | **`17`** | Laser mode disabled. Requires PWM output. |
+| **`18`** | No index pulse in last 6 seconds. |
+| **`19`** | No sync pulse in last 6 seconds. |
 | **`20`** | Unsupported or invalid g-code command found in block. |
 | **`21`** | More than one g-code command from same modal group found in block.|
 | **`22`** | Feed rate has not yet been set or is undefined. |
@@ -302,6 +305,7 @@ ok
 | **`30`** | Maximum spindle speed, RPM |
 | **`31`** | Minimum spindle speed, RPM |
 | **`32`** | Laser-mode enable, boolean |
+| **`40`** | Number of synchronization pulses, count |
 | **`100`** | X-axis steps per millimeter |
 | **`101`** | Y-axis steps per millimeter |
 | **`102`** | Z-axis steps per millimeter |
@@ -359,6 +363,7 @@ Feedback messages provide non-critical information on what Grbl is doing, what i
   
   - `[MSG:Sleeping]` - Appears as an acknowledgement message when Grbl's sleep mode is invoked by issuing a `$SLP` command when in IDLE or ALARM states. Note that Grbl-Mega may invoke this at any time when the sleep timer option has been enabled and the timeout has been exceeded. Grbl may only be exited by a reset in the sleep state and will automatically enter an alarm state since the steppers were disabled.
 	  - NOTE: Sleep will also invoke the parking motion, if it's enabled. However, if sleep is commanded during an ALARM, Grbl will not park and will simply de-energize everything and go to sleep.
+  - `[Se:x.xxx]` - This message appears during G33 moves after each index pulse, when bit 3 in the report mask is set. x.xxx is the error in the unit set
 
 - **Queried Feedback Messages:**
 
@@ -441,6 +446,8 @@ Feedback messages provide non-critical information on what Grbl is doing, what i
 | **`E`** | Force sync upon EEPROM write disabled |
 | **`W`** | Force sync upon work coordinate offset change disabled |
 | **`L`** | Homing initialization auto-lock disabled |
+| **`X`** | Extended Gcodes enabled |
+| **`1`** | Extended Gcodes version 1 (G33) |
     
   - `[echo:]` : Indicates an automated line echo from a command just prior to being parsed and executed. May be enabled only by a config.h option. Often used for debugging communication issues. A typical line echo message is shown below. A separate `ok` will eventually appear to confirm the line has been parsed and executed, but may not be immediate as with any line command containing motions.
       ```
@@ -607,7 +614,7 @@ Feedback messages provide non-critical information on what Grbl is doing, what i
         	- `FS:500,8000` contains real-time feed rate, followed by spindle speed, data as the values. Note the `FS:`, rather than `F:`, data type name indicates spindle speed data is included.
                 
         - The current feed rate value is in mm/min or inches/min, depending on the `$` report inches user setting. 
-        - The second value is the current spindle speed in RPM
+        - The second value is the current spindle speed in RPM. If ($40) the number of synchronization pulses is larger than 0, the actual measured spindle speed is reported, other wise the spindle speed as set.
         
         - These values will often not be the programmed feed rate or spindle speed, because several situations can alter or limit them. For example, overrides directly scale the programmed values to a different running value, while machine settings, acceleration profiles, and even the direction traveled can also limit rates to maximum values allowable.
 

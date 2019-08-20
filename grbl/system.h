@@ -37,6 +37,12 @@
 #define EXEC_MOTION_CANCEL  bit(6) // bitmask 01000000
 #define EXEC_SLEEP          bit(7) // bitmask 10000000
 
+#define EXEC_SPINDLE_INDEX_PULSE  bit(0) // bitmask 00000001
+#define EXEC_PLANNER_SYNC_PULSE   bit(1) // bitmask 00000010
+#define EXEC_SYNCHRONIZATION_STATE_REPORT bit(2) // bitmask 00000100
+#define EXEC_SYNCHRONIZATION_STATE_REPORT_FINAL bit(3) // bitmask 000001000
+#define EXEC_SYNCHRONIZATION_STATE_FEEDBACK_ERROR bit(4) // bitmask 00010000
+
 // Alarm executor codes. Valid values (1-255). Zero is reserved.
 #define EXEC_ALARM_HARD_LIMIT           1
 #define EXEC_ALARM_SOFT_LIMIT           2
@@ -106,6 +112,7 @@
 #define CONTROL_PIN_INDEX_RESET         bit(1)
 #define CONTROL_PIN_INDEX_FEED_HOLD     bit(2)
 #define CONTROL_PIN_INDEX_CYCLE_START   bit(3)
+#define CONTROL_PIN_INDEX_SPINDLE_SYNC	bit(4)
 
 // Define spindle stop override control states.
 #define SPINDLE_STOP_OVR_DISABLED       0  // Must be zero.
@@ -145,11 +152,12 @@ extern system_t sys;
 extern int32_t sys_position[N_AXIS];      // Real-time machine (aka home) position vector in steps.
 extern int32_t sys_probe_position[N_AXIS]; // Last probe position in machine coordinates and steps.
 
-extern volatile uint8_t sys_probe_state;   // Probing state value.  Used to coordinate the probing cycle with stepper ISR.
-extern volatile uint8_t sys_rt_exec_state;   // Global realtime executor bitflag variable for state management. See EXEC bitmasks.
-extern volatile uint8_t sys_rt_exec_alarm;   // Global realtime executor bitflag variable for setting various alarms.
+extern volatile uint8_t sys_probe_state;		// Probing state value.  Used to coordinate the probing cycle with stepper ISR.
+extern volatile uint8_t sys_rt_exec_state;		// Global realtime executor bitflag variable for state management. See EXEC bitmasks.
+extern volatile uint8_t sys_rt_exec_alarm;		// Global realtime executor bitflag variable for setting various alarms.
 extern volatile uint8_t sys_rt_exec_motion_override; // Global realtime executor bitflag variable for motion-based overrides.
 extern volatile uint8_t sys_rt_exec_accessory_override; // Global realtime executor bitflag variable for spindle/coolant overrides.
+
 
 #ifdef DEBUG
   #define EXEC_DEBUG_REPORT  bit(0)
@@ -198,6 +206,7 @@ void system_set_exec_motion_override_flag(uint8_t mask);
 void system_set_exec_accessory_override_flag(uint8_t mask);
 void system_clear_exec_motion_overrides();
 void system_clear_exec_accessory_overrides();
-
+void system_clear_threading_exec_flag(uint8_t mask);
+void system_set_threading_exec_flag(uint8_t mask);
 
 #endif

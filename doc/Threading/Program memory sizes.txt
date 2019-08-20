@@ -1,0 +1,22 @@
+GRBL-Mega 1.1g reported by arduino 30250 / 3343
+	Program Memory Usage 	:	33470 bytes   12,8 % Full
+	Data Memory Usage 		:	3344 bytes   40,8 % Full
+
+
+GRBL-L-Mega reported by arduino 30348 / 3343
+	Program Memory Usage 	:	33648 bytes   12,8 % Full
+	Data Memory Usage 		:	3344 bytes   40,8 % Full
+no init lock GRBL-L-Mega reported by arduino 30340
+				Program Memory Usage 	:	33640 bytes   12,8 % Full
+				Data Memory Usage 		:	3344 bytes   40,8 % Full
+Disable hardware limit switch on Y-axis GRBL-L-Mega reported by arduino 30350
+				Program Memory Usage 	:	33652 bytes   12,8 % Full
+				Data Memory Usage 		:	3344 bytes   40,8 % Full
+Added counting and reporting Index and Sync pulses GRBL-L-Mega reported by arduino 31026 / 3366
+				Program Memory Usage 	:	34258 bytes   13,1 % Full
+				Data Memory Usage 		:	3367 bytes   41,1 % Full
+Added G33 complete, working and tested reported by arduino 32506 / 3444
+				Program Memory Usage 	:	35358 bytes   13,5 % Full
+				Data Memory Usage 		:	3441 bytes   42,0 % Full
+All coding done, cleanedup, working and tested reported by arduino 32384 / 3314
+

@@ -1,0 +1,2 @@
+RPM measurements
+RPM measurement are wrong above 1500 RPM on my lathe but not using the spindle pulse emulator.
