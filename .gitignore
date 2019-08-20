@@ -1,0 +1,10 @@
+
+*.mk~Added measuring tics between sync pulses
+*.scc
+*.xml
+*.elf
+*.d
+*.o
+*.map~Added measuring tics between sync pulses
+*.cproj~Added measuring tics between sync pulses
+Debug/Makefile~Added measuring tics between sync pulses
