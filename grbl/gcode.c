@@ -157,8 +157,9 @@ uint8_t gc_execute_line(char *line)
               mantissa = 0; // Set to zero to indicate valid non-integer G command.
             }                
             break;
-		  case 33: //Check if Synchronization pulses per revolution is set
+		  case 33: //Check if Synchronization pulses per revolution is set and hardware limits are enabled
 		    if (settings.sync_pulses_per_revolution==0) FAIL(STATUS_GCODE_G33_SYNCHRONIZATION_PULSES_PER_REVOLUTION_NOT_SET);
+			if (bit_isfalse(settings.flags,BITFLAG_HARD_LIMIT_ENABLE)) FAIL(STATUS_GCODE_G33_HARDWARE_LIMITS_NOT_ENABLED);
             // No break. Continues to next line.
           case 0: case 1: case 2: case 3: case 38:
             // Check for G0/1/2/3/38 being called with G10/28/30/92 on same block.

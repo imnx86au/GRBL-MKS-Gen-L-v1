@@ -38,3 +38,4 @@
 "37","Invalid gcode ID:37","G43.1 dynamic tool length offset is not assigned to configured tool length axis."
 "38","Invalid gcode ID:38","Tool number greater than max supported value."
 "39","Invalid gcode ID:39","Synchronization pulses per rotation not set ($40=0)"
+"40","Invalid gcode ID:34","Hardware limits not enabled ($21=0)"
