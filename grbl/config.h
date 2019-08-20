@@ -47,7 +47,7 @@
 #define SERIAL0		//uncomment to use USART0 TX0/RX0 (default) 
 //#define SERIAL1		//uncomment to use USART1 TX1/RX1 
 //#define SERIAL2		//uncomment to use USART2 TX2/RX2 
-//#define SERIAL3			//uncomment to use USART3 TX3/RX3
+//#define SERIAL3		//uncomment to use USART3 TX3/RX3
 
 // Define CPU pin map and default settings.
 // NOTE: OEMs can avoid the need to maintain/update the defaults.h and cpu_map.h files and use only
