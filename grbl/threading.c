@@ -57,9 +57,7 @@ void threading_reset()
 //To avoid updates while reading, it is handle atomic
 uint32_t timer_tics_passed_since_last_index_pulse()
 {
-	uint32_t tics;
-	ATOMIC_BLOCK(ATOMIC_RESTORESTATE){tics=get_timer_ticks()-threading_index_Last_timer_tics;}				// Use atomic to avoid errors due to timer updates
-	return tics;
+	ATOMIC_BLOCK(ATOMIC_RESTORESTATE){return get_timer_ticks()-threading_index_Last_timer_tics;}				// Use atomic to avoid errors due to timer updates
 }
 // This routine processes the spindle index pin hit by increasing the index pulse counter and calculating the time between pulses
 // This calculated spindle speed is used for showing the actual spindle speed in the report
