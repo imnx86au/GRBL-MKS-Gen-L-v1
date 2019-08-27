@@ -1,2 +1,10 @@
 RPM measurements
 RPM measurement are wrong above 1500 RPM on my lathe but not using the spindle pulse emulator.
+
+Error error: lto-wrapper failed during compilation
+This is a known GCC compiler issue in some arduino boards versions like "Arduino AVR boards version 1.6.23"
+Downgrading the boards version to 1.6.22 will solve the problem.
+- Select Tools|Board|Boards Manager from the menu
+- select Arduino AVR boards Built-in by Arduino
+- select version 1.6.22 and select install
+Try to upload again.
