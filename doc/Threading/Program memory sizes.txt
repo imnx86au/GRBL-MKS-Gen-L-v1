@@ -18,8 +18,13 @@ Added counting and reporting Index and Sync pulses GRBL-L-Mega reported by ardui
 Added G33 complete, working and tested reported by arduino 32506 / 3444
 				Program Memory Usage 	:	35358 bytes   13,5 % Full
 				Data Memory Usage 		:	3441 bytes   42,0 % Full
-All coding done, cleanedup, working and tested reported by arduino 32384 / 3314
+grbl avr boards version 1.6.22
+All coding done, cleanedup, working and tested reported by arduino 32384 / 3314 grbl avr boards version 1.6.22
 Release 20190820 reported by arduino 32424 / 3424	36 planner blocks (default)
+Release 20190820 board version 1.6.22 IDE 1.8.9
 Release 20190820 reported by arduino 32424 / 3314	34 planner blocks 
 fixed rare error reading timer during timer overflow 32570 / 3314
+Release 20190820 board version 1.8.1 IDE 1.8.10
+Sketch uses 32298 bytes (12%) of program storage space. Maximum is 253952 bytes.
+Global variables use 3314 bytes (40%) of dynamic memory, leaving 4878 bytes for local variables. Maximum is 8192 bytes.
 

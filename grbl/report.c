@@ -135,6 +135,15 @@ void report_alarm_message(uint8_t alarm_code)
   delay_ms(500); // Force delay to ensure message clears serial write buffer.
 }
 
+//Prints a 8 bit debug message
+void report_debug_message(uint8_t Message)
+{
+  printPgmString(PSTR("[Db:"));
+      print_uint8_base10(Message);
+  printPgmString(PSTR("]"));
+  report_util_line_feed();
+}
+
 // Prints feedback messages. This serves as a centralized method to provide additional
 // user feedback for things that are not of the status/alarm message protocol. These are
 // messages such as setup warnings, switch toggling, and how to exit alarms.
@@ -613,17 +622,17 @@ void report_realtime_status()
   #endif
  
   // report the synchronization state (G33) 
-  if (bit_istrue(threading_exec_flags,(EXEC_SYNCHRONIZATION_STATE_REPORT))) {				// report if a report is flagged
+  //if (spindle_synchronization_active()) {												 
+    if (bit_istrue(threading_exec_flags,(EXEC_SYNCHRONIZATION_STATE_REPORT))) {				// report if a report is flagged
 	  printPgmString(PSTR("|Se:"));
 	  printFloat_CoordValue(synchronization_millimeters_error);								// print the synchronization error in the unit set
 	  bit_false(threading_exec_flags,EXEC_SYNCHRONIZATION_STATE_REPORT);					// clear the flag to avoid reporting the same value again
-  }
-  else if (bit_istrue(threading_exec_flags,EXEC_SYNCHRONIZATION_STATE_REPORT_FINAL)) {		// if a final report is flagged and spindle synchronization is inactive
-    if (!spindle_synchronization_active()) {												 
-	  printPgmString(PSTR("|Se:"));															// Report report a 0 value after G33 , looks better in a GUI
-	  printFloat(0,2);																		
-	  bit_false(threading_exec_flags,EXEC_SYNCHRONIZATION_STATE_REPORT_FINAL);				// clear the flag to avoid reporting the same value again
-	}
+    }
+  //}  else if (bit_istrue(threading_exec_flags,EXEC_SYNCHRONIZATION_STATE_REPORT_FINAL)) {		// if a final report is flagged and spindle synchronization is inactive
+	  else {
+	printPgmString(PSTR("|Se:"));															// Report report a 0 value after G33 , looks better in a GUI
+	printFloat(0,2);																		
+	bit_false(threading_exec_flags,EXEC_SYNCHRONIZATION_STATE_REPORT_FINAL);				// clear the flag to avoid reporting the same value again
   }
  
   serial_write('>');
