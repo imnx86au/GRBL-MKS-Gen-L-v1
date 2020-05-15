@@ -1,5 +1,5 @@
 RPM measurements
-RPM measurement are wrong above 1500 RPM on my lathe but not using the spindle pulse emulator.
+RPM measurement measurements are influenced by the receive of false index pulses, most likely due to electronic noise. If you exepriance these kind of problems, activate the spindle index and synchronization pulse debouncing (setting $41)
 
 Error error: lto-wrapper failed during compilation
 This is a known GCC compiler issue in some arduino boards versions like "Arduino AVR boards version 1.6.23"
