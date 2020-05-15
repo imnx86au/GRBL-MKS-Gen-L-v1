@@ -177,6 +177,8 @@ Every G-code block sent to Grbl and Grbl `$` system command that is terminated w
 | **`36`** | There are unused, leftover G-code words that aren't used by any command in the block.|
 | **`37`** | The `G43.1` dynamic tool length offset command cannot apply an offset to an axis other than its configured axis. The Grbl default axis is the Z-axis.|
 | **`38`** | Tool number greater than max supported value.|
+| **`39`** | G33 Synchronization pulses per rotation not set ($40=0).|
+| **`40`** | G33 Hardware limits not enabled ($21=0).|
 
 
 ----------------------
@@ -266,6 +268,8 @@ $27=1.000
 $30=1000
 $31=0
 $32=0
+$40=0
+$41=0
 $100=250.000
 $101=250.000
 $102=250.000
@@ -306,6 +310,7 @@ ok
 | **`31`** | Minimum spindle speed, RPM |
 | **`32`** | Laser-mode enable, boolean |
 | **`40`** | Number of synchronization pulses, count |
+| **`41`** | Number of 4us index and synchronization debounce tics, count |
 | **`100`** | X-axis steps per millimeter |
 | **`101`** | Y-axis steps per millimeter |
 | **`102`** | Z-axis steps per millimeter |
