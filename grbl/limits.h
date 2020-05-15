@@ -38,4 +38,7 @@ void limits_go_home(uint8_t cycle_mask);
 // Check for soft limit violations
 void limits_soft_check(float *target);
 
+// process limit pin change for index pulse processing
+void process_limit_pin_change_event();
+
 #endif

@@ -20,19 +20,21 @@
 
 #include "grbl.h"
 
-
 void system_init()
 {
-  CONTROL_DDR &= ~(CONTROL_MASK); // Configure as input pins
+  CONTROL_DDR &= ~(CONTROL_MASK);   // Configure as input pins
   #ifdef DISABLE_CONTROL_PIN_PULL_UP
-    CONTROL_PORT &= ~(CONTROL_MASK); // Normal low operation. Requires external pull-down.
+    CONTROL_PORT &= ~(CONTROL_MASK);// Normal low operation. Requires external pull-down.
   #else
     CONTROL_PORT |= CONTROL_MASK;   // Enable internal pull-up resistors. Normal high operation.
   #endif
-  CONTROL_PCMSK |= CONTROL_MASK;  // Enable specific pins of the Pin Change Interrupt
-  PCICR |= (1 << CONTROL_INT);   // Enable Pin Change Interrupt
+  CONTROL_PCMSK |= CONTROL_MASK;    // Enable specific pins of the Pin Change Interrupt
+  PCICR |= (1 << CONTROL_INT);      // Enable Pin Change Interrupt
+#ifdef DEFAULTS_RAMPS_BOARD         // On Mega board Index pulses are on the INT0 interrupt pin (D2)
+	EICRA = 0x02 | 0x08;              // Interrupt INT0 INT1 on falling edge
+	EIMSK = 0x01 | 0x02;              // Enable INT0 INT1
+#endif
 }
-
 
 // Returns control pin state as a uint8 bitfield. Each bit indicates the input pin state, where
 // triggered is 1 and not triggered is 0. Invert mask is applied. Bitfield organization is
@@ -49,20 +51,31 @@ uint8_t system_control_get_state()
     if (bit_isfalse(pin,(1<<CONTROL_RESET_BIT))) { control_state |= CONTROL_PIN_INDEX_RESET; }
     if (bit_isfalse(pin,(1<<CONTROL_FEED_HOLD_BIT))) { control_state |= CONTROL_PIN_INDEX_FEED_HOLD; }
     if (bit_isfalse(pin,(1<<CONTROL_CYCLE_START_BIT))) { control_state |= CONTROL_PIN_INDEX_CYCLE_START; }
+#ifndef DEFAULTS_RAMPS_BOARD        //On RAMPS board SYNC pulses are on the INT1 interrupt pin (D3)
     if (bit_isfalse(pin,(1<<CONTROL_SPINDLE_SYNC_BIT))) { control_state |= CONTROL_PIN_INDEX_SPINDLE_SYNC; }
+#endif
   }
   return(control_state);
 }
-
+//On the RAMPS Board, Index pulses are service by INT0 Pin D2
+ISR(INT0_vect){
+	if (settings.sync_pulses_per_revolution>=1)  							// If G33 is configured for index pulses
+		debounce_index_pulse();												          // Debounce the index pulse.
+}
+//On the RAMPS Board, SYNC pulses are service by INT1 Pin D3
+ISR(INT1_vect){
+	if (settings.sync_pulses_per_revolution>1) { 	            // If G33 is configured for index and synchronization pulses
+    debounce_sync_pulse();                                  // Debounce the synchronization pulse
+	}
+}
 
 // Pin change interrupt for pin-out commands, i.e. cycle start, feed hold, and reset. Sets
 // only the realtime command execute variable to have the main program execute these when
 // its ready. This works exactly like the character-based realtime commands when picked off
 // directly from the incoming serial data stream.
-ISR(CONTROL_INT_vect)
-{
+ISR(CONTROL_INT_vect){
   uint8_t pin = system_control_get_state();
-  if (pin) {
+	if (pin) {
     if (bit_istrue(pin,CONTROL_PIN_INDEX_RESET)) {
       mc_reset();
     } else if (bit_istrue(pin,CONTROL_PIN_INDEX_CYCLE_START)) {
@@ -71,14 +84,15 @@ ISR(CONTROL_INT_vect)
       bit_true(sys_rt_exec_state, EXEC_FEED_HOLD); 
     } else if (bit_istrue(pin,CONTROL_PIN_INDEX_SAFETY_DOOR)) {
       bit_true(sys_rt_exec_state, EXEC_SAFETY_DOOR);
-	} else if (bit_istrue(pin,CONTROL_PIN_INDEX_SPINDLE_SYNC)) {			// Detected a G33 spindle synchronization pulse. Beware, this is not the spindle index pulse
-	  if (settings.sync_pulses_per_revolution>1) { 							// If G33 is configured for synchronization pulses
-	  bit_true(threading_exec_flags,EXEC_PLANNER_SYNC_PULSE);				// Signal the detection of a synchronization pulse.
+#ifndef DEFAULTS_RAMPS_BOARD                                        // On RAMPS board INDEX and SYNC pulses are on the INT0 and INT1 interrupt service by dedicated ISR
+	  } else if (bit_istrue(pin,CONTROL_PIN_INDEX_SPINDLE_SYNC)) {		// Detected a G33 spindle synchronization pulse. Beware, this is not the spindle index pulse
+	    if (settings.sync_pulses_per_revolution>1) { 							    // If G33 is configured for synchronization pulses
+      debounce_sync_pulse();                                        // debounce the synchronization pulse
+	    }
+#endif
 	  }
-	}
   }
-}
-
+}   
 
 // Returns if safety door is ajar(T) or closed(F), based on pin state.
 uint8_t system_check_safety_door_ajar()

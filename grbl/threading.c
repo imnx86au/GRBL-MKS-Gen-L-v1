@@ -100,3 +100,24 @@ bool spindle_synchronization_active()
 	return false;
 }
 
+// Returns true if the index pulse is active
+bool index_pulse_active()
+{
+#ifndef DEFAULTS_RAMPS_BOARD //On Mega board SYNC pulses are on the INT1 interrupt pin (D3) 
+	return limits_get_state(LIMIT_PIN_MASK_Y_AXIS);	// This is the lathe version, Y-axis limit pin hits are spindle index pulses so handle them and do not reset controller
+#else
+	return bit_isfalse(SPINDLE_INDEX_PIN, SPINDLE_INDEX_MASK);								// spindle index pulses are on INT0 = SCL input, active low
+#endif
+}
+
+// Returns true if the sync pulse is active
+bool sync_pulse_active()
+{
+	if (settings.sync_pulses_per_revolution==1) return index_pulse_active();				// the index pulse is used as sync pulse
+#ifndef DEFAULTS_RAMPS_BOARD //On Mega board SYNC pulses are on the INT1 interrupt pin (D3)
+	uint8_t pin = system_control_get_state();
+	return bit_istrue(pin,CONTROL_PIN_INDEX_SPINDLE_SYNC);									// spindle sync pulses are on ctrl input
+#else
+	return bit_isfalse(SPINDLE_SYNC_PIN, SPINDLE_SYNC_MASK);								// spindle sync pulses are on INT1 = SDA input, active low
+#endif
+}

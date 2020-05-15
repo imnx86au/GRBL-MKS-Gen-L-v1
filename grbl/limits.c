@@ -171,8 +171,8 @@ uint8_t limits_get_state(uint8_t selected_pins) //
   #endif
 #else
 
-//Processes the limit pins change events. 
-//It is called when the limit pins change event is trigged eventually after a software debounce
+// Processes the limit pins change events. 
+// It is called when the limit pins change event is trigged 
 // Ignore limit switches if already in an alarm state or in-process of executing an alarm.
 // When in the alarm state, Grbl should have been reset or will force a reset, so any pending
 // moves in the planner and serial buffers are all cleared and newly sent blocks will be
@@ -180,18 +180,18 @@ uint8_t limits_get_state(uint8_t selected_pins) //
 // limit setting if their limits are constantly triggering after a reset and move their axes.
 void process_limit_pin_change_event()
 {
-   if (sys.state != STATE_ALARM) {
-	 if (!(sys_rt_exec_alarm)) {
-	   if (limits_get_state(LIMIT_PIN_MASK_Y_AXIS)) {	// This is the lathe version, Y-axis limit pin hits are spindle index pulses so handle them and do not reset controller
-		   system_set_threading_exec_flag(EXEC_SPINDLE_INDEX_PULSE);	// pin is index pulse
-       }
-      else 
-        if (limits_get_state(LIMIT_PIN_MASK_ALL_EXCEPT_Y_AXIS)) { // handle all axis except the y-axis
-	      mc_reset(); // Initiate system kill.
-          system_set_exec_alarm(EXEC_ALARM_HARD_LIMIT); // Indicate hard limit critical event
-        }
-	 }
-   }
+  if (sys.state != STATE_ALARM) {
+	if (!(sys_rt_exec_alarm)) {
+	  //if (limits_get_state(LIMIT_PIN_MASK_Y_AXIS)) {	// This is the lathe version, Y-axis limit pin hits are spindle index pulses so handle them and do not reset controller
+		  //debounce_indexpulse();						// debounce the index pulse
+      //}
+      //else
+	   if (limits_get_state(LIMIT_PIN_MASK_ALL_EXCEPT_Y_AXIS)) { // handle all axis except the y-axis
+	    mc_reset(); // Initiate system kill.
+        system_set_exec_alarm(EXEC_ALARM_HARD_LIMIT); // Indicate hard limit critical event
+      }
+	}
+  }
 }
 
 // The Limit Pin Change Interrupt handles the hard limit feature. A bouncing 
@@ -208,15 +208,22 @@ void process_limit_pin_change_event()
   #ifndef ENABLE_SOFTWARE_DEBOUNCE
     ISR(LIMIT_INT_vect) // DEFAULT: Limit pin change interrupt process. 
     {
-		process_limit_pin_change_event(); //no debouncing
+		coolant_set_state(COOLANT_FLOOD_ENABLE);		// just for debugging purposes
+		system_set_threading_exec_flag(EXEC_SPINDLE_INDEX_PULSE);			// Signal the receive of an index pulse
+//
+		//if (limits_get_state(LIMIT_PIN_MASK_Y_AXIS)) // limit pins are debounced using a user settable delay
+			//debounce_indexpulse(); //index pin is debounced different
+		//else
+		  //process_limit_pin_change_event(); //no debouncing of limit pins, index pin is handled different
+	coolant_set_state(COOLANT_DISABLE);		// just for debugging purposes
     }  
   #else
     // Upon limit pin change, Software debounce by enabling watchdog timer that will handle the pin change after a short delay (watchdog time out). 
     ISR(LIMIT_INT_vect)
 	{
-		if (limits_get_state(LIMIT_PIN_MASK_Y_AXIS))
+		if (limits_get_state(LIMIT_PIN_MASK_Y_AXIS)) // limit pins are debounced using a user settable delay
 		{
-		  process_limit_pin_change_event(); //no debouncing
+			debounce_index_pulse(); //index pin is debounced different
 		}
 		else
 		{

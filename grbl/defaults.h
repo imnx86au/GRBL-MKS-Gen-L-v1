@@ -64,6 +64,8 @@
   #define DEFAULT_HOMING_DEBOUNCE_DELAY 250 // msec (0-65k)
   #define DEFAULT_HOMING_PULLOFF 1.0 // mm
   #define DEFAULT_SYNC_PULSES_PER_REVOLUTION 0 //Only spindle index pulse, minimum requirement
+  #define DEFAULT_DEBOUNCE_TICS 0 //default debounce time for index and sync pulses, disabled by default
+  
 #endif
 
 #ifdef DEFAULTS_SHERLINE_5400
@@ -107,6 +109,7 @@
   #define DEFAULT_HOMING_DEBOUNCE_DELAY 250 // msec (0-65k)
   #define DEFAULT_HOMING_PULLOFF 1.0 // mm
   #define DEFAULT_SYNC_PULSES_PER_REVOLUTION 0 //Only spindle index pulse, minimum requirement
+  #define DEFAULT_DEBOUNCE_TICS 0 //default debounce time for index and sync pulses, disabled by default
 #endif
 
 #ifdef DEFAULTS_SHAPEOKO
@@ -153,6 +156,7 @@
   #define DEFAULT_HOMING_DEBOUNCE_DELAY 250 // msec (0-65k)
   #define DEFAULT_HOMING_PULLOFF 1.0 // mm  
   #define DEFAULT_SYNC_PULSES_PER_REVOLUTION 0 //Only spindle index pulse, minimum requirement
+  #define DEFAULT_DEBOUNCE_TICS 0 //default debounce time for index and sync pulses, disabled by default
 #endif
 
 #ifdef DEFAULTS_SHAPEOKO_2
@@ -199,6 +203,7 @@
   #define DEFAULT_HOMING_DEBOUNCE_DELAY 250 // msec (0-65k)
   #define DEFAULT_HOMING_PULLOFF 1.0 // mm  
   #define DEFAULT_SYNC_PULSES_PER_REVOLUTION 0 //Only spindle index pulse, minimum requirement
+  #define DEFAULT_DEBOUNCE_TICS 0 //default debounce time for index and sync pulses, disabled by default
 #endif
 
 #ifdef DEFAULTS_SHAPEOKO_3
@@ -244,6 +249,7 @@
   #define DEFAULT_HOMING_DEBOUNCE_DELAY 25 // msec (0-65k)
   #define DEFAULT_HOMING_PULLOFF 5.0 // mm  
   #define DEFAULT_SYNC_PULSES_PER_REVOLUTION 0 //Only spindle index pulse, minimum requirement
+  #define DEFAULT_DEBOUNCE_TICS 0 //default debounce time for index and sync pulses, disabled by default
 #endif
 
 #ifdef DEFAULTS_X_CARVE_500MM
@@ -290,6 +296,7 @@
   #define DEFAULT_HOMING_DEBOUNCE_DELAY 250 // msec (0-65k)
   #define DEFAULT_HOMING_PULLOFF 1.0 // mm 
   #define DEFAULT_SYNC_PULSES_PER_REVOLUTION 0 //Only spindle index pulse, minimum requirement
+  #define DEFAULT_DEBOUNCE_TICS 0 //default debounce time for index and sync pulses, disabled by default
 #endif
 
 #ifdef DEFAULTS_X_CARVE_1000MM
@@ -336,6 +343,7 @@
   #define DEFAULT_HOMING_DEBOUNCE_DELAY 250 // msec (0-65k)
   #define DEFAULT_HOMING_PULLOFF 1.0 // mm 
   #define DEFAULT_SYNC_PULSES_PER_REVOLUTION 0 //Only spindle index pulse, minimum requirement
+  #define DEFAULT_DEBOUNCE_TICS 0 //default debounce time for index and sync pulses, disabled by default
 #endif
 
 #ifdef DEFAULTS_ZEN_TOOLWORKS_7x7
@@ -380,6 +388,7 @@
   #define DEFAULT_HOMING_DEBOUNCE_DELAY 250 // msec (0-65k)
   #define DEFAULT_HOMING_PULLOFF 1.0 // mm
   #define DEFAULT_SYNC_PULSES_PER_REVOLUTION 0 //Only spindle index pulse, minimum requirement
+  #define DEFAULT_DEBOUNCE_TICS 0 //default debounce time for index and sync pulses, disabled by default
 #endif
 
 #ifdef DEFAULTS_OXCNC
@@ -420,6 +429,7 @@
   #define DEFAULT_HOMING_DEBOUNCE_DELAY 250 // msec (0-65k)
   #define DEFAULT_HOMING_PULLOFF 1.0 // mm
   #define DEFAULT_SYNC_PULSES_PER_REVOLUTION 0 //Only spindle index pulse, minimum requirement
+  #define DEFAULT_DEBOUNCE_TICS 0 //default debounce time for index and sync pulses, disabled by default
 #endif
 
 #ifdef DEFAULTS_SIMULATOR
@@ -460,6 +470,7 @@
   #define DEFAULT_HOMING_DEBOUNCE_DELAY 250 // msec (0-65k)
   #define DEFAULT_HOMING_PULLOFF 1.0 // mm
   #define DEFAULT_SYNC_PULSES_PER_REVOLUTION 0 //Only spindle index pulse, minimum requirement
+  #define DEFAULT_DEBOUNCE_TICS 0 //default debounce time for index and sync pulses, disabled by default
 #endif
 
 #ifdef DEFAULTS_RAMPS_BOARD
@@ -504,6 +515,7 @@
   #define DEFAULT_HOMING_DEBOUNCE_DELAY 250 // msec (0-65k)
   #define DEFAULT_HOMING_PULLOFF 1.0 // mm
   #define DEFAULT_SYNC_PULSES_PER_REVOLUTION 0 //Only spindle index pulse, minimum requirement
+  #define DEFAULT_DEBOUNCE_TICS 0 //default debounce time for index and sync pulses, disabled by default
 #endif
 
 #endif

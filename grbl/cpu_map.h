@@ -276,6 +276,16 @@
   #define SPINDLE_PWM_DDR   DDRH
   #define SPINDLE_PWM_PORT  PORTH
   #define SPINDLE_PWM_BIT   5 // MEGA2560 Digital Pin 8 
+  
+  #define SPINDLE_INDEX_DDR		DDRD
+  #define SPINDLE_INDEX_PIN 	PIND
+  #define SPINDLE_INDEX_BIT		0		// MEGA2560 SCL = D2 
+  #define SPINDLE_INDEX_MASK    (1<<SPINDLE_INDEX_BIT)
+
+  #define SPINDLE_SYNC_DDR		DDRD
+  #define SPINDLE_SYNC_PIN 		PIND
+  #define SPINDLE_SYNC_BIT		1		// MEGA2560 SDA = D3
+  #define SPINDLE_SYNC_MASK    (1<<SPINDLE_SYNC_BIT)
 
 #endif
 /* 

@@ -112,7 +112,8 @@ typedef struct {
   uint16_t homing_debounce_delay;
   float homing_pulloff;
   
-  uint16_t sync_pulses_per_revolution;	//the number of synchronization pulses per spindle revolution
+  uint16_t sync_pulses_per_revolution;	// the number of synchronization pulses per spindle revolution
+  uint16_t debounce_tics;				        // the number of 4 us debounce tics for index and sync pulses
 } settings_t;
 extern settings_t settings;
 

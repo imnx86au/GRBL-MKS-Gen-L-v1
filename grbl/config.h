@@ -47,7 +47,7 @@
 #define SERIAL0		//uncomment to use USART0 TX0/RX0 (default) 
 //#define SERIAL1		//uncomment to use USART1 TX1/RX1 
 //#define SERIAL2		//uncomment to use USART2 TX2/RX2 
-//#define SERIAL3			//uncomment to use USART3 TX3/RX3
+//#define SERIAL3		//uncomment to use USART3 TX3/RX3
 
 // Define CPU pin map and default settings.
 // NOTE: OEMs can avoid the need to maintain/update the defaults.h and cpu_map.h files and use only
@@ -56,9 +56,9 @@
 #define DEFAULTS_GENERIC
 #define CPU_MAP_2560_INITIAL
 
-// To use with RAMPS 1.4 Board, comment out the above defines and uncomment the next two defines
- //#define DEFAULTS_RAMPS_BOARD
- //#define CPU_MAP_2560_RAMPS_BOARD
+// To use with RAMPS 1.4/1.6 Boards, comment out the above defines and uncomment the next two defines
+// #define DEFAULTS_RAMPS_BOARD
+// #define CPU_MAP_2560_RAMPS_BOARD
 
 // Serial baud rate
 // #define BAUD_RATE 230400
@@ -482,6 +482,12 @@
 // use shielded signal cables with their shielding connected to ground (old USB/computer cables 
 // work well and are cheap to find) and wire in a low-pass circuit into each limit pin.
 #define ENABLE_SOFTWARE_DEBOUNCE // Default enabled for the lathe
+
+// This setting is used for limiting the user settable ($41) debouncing Spindle Index and Synchronization pulses
+// Even if $41 is set to 0, there is still a high frequenty debounce filter because there is a 
+// double check, once the pulse is detected (ISR) and once the pulse is processed (protocol_execute_realtime())
+#define MIN_DEBOUNCE_TICS 10
+#define MAX_DEBOUNCE_TICS 50000
 
 // Configures the position after a probing cycle during Grbl's check mode. Disabled sets
 // the position to the probe target, when enabled sets the position to the start position.

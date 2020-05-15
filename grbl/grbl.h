@@ -22,8 +22,8 @@
 #define grbl_h
 
 // Grbl versioning system
-#define GRBL_VERSION "1.1g"
-#define GRBL_VERSION_BUILD "20191003.Mega"
+#define GRBL_VERSION "1.1g2"
+#define GRBL_VERSION_BUILD "20200510.Mega"
 
 // Define standard libraries used by Grbl.
 #include <util/atomic.h>
