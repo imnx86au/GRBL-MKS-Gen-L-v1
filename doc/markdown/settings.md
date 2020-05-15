@@ -52,6 +52,7 @@ $30=1000.
 $31=0.
 $32=0
 $40=0
+$41=0
 $100=250.000
 $101=250.000
 $102=250.000
@@ -240,6 +241,13 @@ The maximum number is 65536 but the arduino uno or mega controller processing po
 * Set to 0 if there is not spindle synchronization pulse. 
 * Set to 1 if there is only an index pulse. For G33 to work, there must be at least an index pulse.
 * Set to the resolution of the spindle encoder if there is a synchronization encoder on the spindle besides the index pulse. 
+
+### $41 Index and Synchronization 4 us debounce tics
+
+Receiving false spindle index or synchronization pulses during threading, will lead to a ruined thread. To reduce false pulses, a software debounce filter has been implemented to check after a period of time if the pulse still exists. As a side effect, threading starts after the debounce period has expired. This makes the start position of the thread more influenced by spindle speed changes. Keep this setting as low as possible, preferable below 250 tics (1 ms).
+
+* Set to 0 to disable spindle index and synchronization pulse debouncing. 
+* Set to 10 .. 50000 to enable spindle index and synchronization pulse debouncing.
 
 #### $100, $101 and $102 – [X,Y,Z] steps/mm
 
