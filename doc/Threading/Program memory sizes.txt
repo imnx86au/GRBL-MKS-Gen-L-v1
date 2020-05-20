@@ -1,7 +1,11 @@
+
+GRBL-L-Mega VER:1.1g2.20200510.Mega reported by arduino
+	Sketch uses 33172 bytes (13%) of program storage space. Maximum is 253952 bytes.
+	Global variables use 3316 bytes (40%) of dynamic memory, leaving 4876 bytes for local variables. Maximum is 8192 bytes
+
 GRBL-Mega 1.1g reported by arduino 30250 / 3343
 	Program Memory Usage 	:	33470 bytes   12,8 % Full
 	Data Memory Usage 		:	3344 bytes   40,8 % Full
-
 
 GRBL-L-Mega reported by arduino 30348 / 3343
 	Program Memory Usage 	:	33648 bytes   12,8 % Full

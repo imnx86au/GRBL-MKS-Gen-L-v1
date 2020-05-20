@@ -170,63 +170,48 @@ uint8_t limits_get_state(uint8_t selected_pins) //
     #error "HW limits are not implemented"
   #endif
 #else
-
-// Processes the limit pins change events. 
-// It is called when the limit pins change event is trigged 
-// Ignore limit switches if already in an alarm state or in-process of executing an alarm.
-// When in the alarm state, Grbl should have been reset or will force a reset, so any pending
-// moves in the planner and serial buffers are all cleared and newly sent blocks will be
-// locked out until a homing cycle or a kill lock command. Allows the user to disable the hard
-// limit setting if their limits are constantly triggering after a reset and move their axes.
-void process_limit_pin_change_event()
-{
-  if (sys.state != STATE_ALARM) {
-	if (!(sys_rt_exec_alarm)) {
-	  //if (limits_get_state(LIMIT_PIN_MASK_Y_AXIS)) {	// This is the lathe version, Y-axis limit pin hits are spindle index pulses so handle them and do not reset controller
-		  //debounce_indexpulse();						// debounce the index pulse
-      //}
-      //else
-	   if (limits_get_state(LIMIT_PIN_MASK_ALL_EXCEPT_Y_AXIS)) { // handle all axis except the y-axis
-	    mc_reset(); // Initiate system kill.
-        system_set_exec_alarm(EXEC_ALARM_HARD_LIMIT); // Indicate hard limit critical event
-      }
-	}
+  // Processes the limit pins change events. 
+  // It is called when the limit pins change event is trigged 
+  // Ignore limit switches if already in an alarm state or in-process of executing an alarm.
+  // When in the alarm state, Grbl should have been reset or will force a reset, so any pending
+  // moves in the planner and serial buffers are all cleared and newly sent blocks will be
+  // locked out until a homing cycle or a kill lock command. Allows the user to disable the hard
+  // limit setting if their limits are constantly triggering after a reset and move their axes.
+  void process_limit_pin_change_event()
+  {
+    if (sys.state != STATE_ALARM) {
+    	if (!(sys_rt_exec_alarm)) {
+    	  if (limits_get_state(LIMIT_PIN_MASK_ALL_EXCEPT_Y_AXIS)) { // handle all axis except the y-axis
+    	    mc_reset(); // Initiate system kill.
+          system_set_exec_alarm(EXEC_ALARM_HARD_LIMIT); // Indicate hard limit critical event
+         }
+    	 }
+    }
   }
-}
 
-// The Limit Pin Change Interrupt handles the hard limit feature. A bouncing 
-// limit switch can cause a lot of problems, like false readings and multiple interrupt calls.
-// If a switch is triggered at all, something bad has happened and treat it as such, regardless
-// if a limit switch is being disengaged. It's impossible to reliably tell the state of a
-// bouncing pin because the Arduino microcontroller does not retain any state information when
-// detecting a pin change. If we poll the pins in the ISR, you can miss the correct reading if the 
-// switch is bouncing.
-// NOTE: Do not attach an e-stop to the limit pins, because this interrupt is disabled during
-// homing cycles and will not respond correctly. Upon user request or need, there may be a
-// special pinout for an e-stop, but it is generally recommended to just directly connect
-// your e-stop switch to the Arduino reset pin, since it is the most correct way to do this.
+  // The Limit Pin Change Interrupt handles the hard limit feature. A bouncing 
+  // limit switch can cause a lot of problems, like false readings and multiple interrupt calls.
+  // If a switch is triggered at all, something bad has happened and treat it as such, regardless
+  // if a limit switch is being disengaged. It's impossible to reliably tell the state of a
+  // bouncing pin because the Arduino microcontroller does not retain any state information when
+  // detecting a pin change. If we poll the pins in the ISR, you can miss the correct reading if the 
+  // switch is bouncing.
+  // NOTE: Do not attach an e-stop to the limit pins, because this interrupt is disabled during
+  // homing cycles and will not respond correctly. Upon user request or need, there may be a
+  // special pinout for an e-stop, but it is generally recommended to just directly connect
+  // your e-stop switch to the Arduino reset pin, since it is the most correct way to do this.
   #ifndef ENABLE_SOFTWARE_DEBOUNCE
-    ISR(LIMIT_INT_vect) // DEFAULT: Limit pin change interrupt process. 
+  ISR(LIMIT_INT_vect) // DEFAULT: Limit pin change interrupt process. 
     {
-		coolant_set_state(COOLANT_FLOOD_ENABLE);		// just for debugging purposes
 		system_set_threading_exec_flag(EXEC_SPINDLE_INDEX_PULSE);			// Signal the receive of an index pulse
-//
-		//if (limits_get_state(LIMIT_PIN_MASK_Y_AXIS)) // limit pins are debounced using a user settable delay
-			//debounce_indexpulse(); //index pin is debounced different
-		//else
-		  //process_limit_pin_change_event(); //no debouncing of limit pins, index pin is handled different
-	coolant_set_state(COOLANT_DISABLE);		// just for debugging purposes
     }  
   #else
-    // Upon limit pin change, Software debounce by enabling watchdog timer that will handle the pin change after a short delay (watchdog time out). 
-    ISR(LIMIT_INT_vect)
+  // Upon limit pin change, Software debounce by enabling watchdog timer that will handle the pin change after a short delay (watchdog time out). 
+  ISR(LIMIT_INT_vect)
 	{
 		if (limits_get_state(LIMIT_PIN_MASK_Y_AXIS)) // limit pins are debounced using a user settable delay
-		{
 			debounce_index_pulse(); //index pin is debounced different
-		}
-		else
-		{
+    if (limits_get_state(LIMIT_PIN_MASK_ALL_EXCEPT_Y_AXIS)) {   // Check for other interrupts
 		   if (!(WDTCSR & (1<<WDIE)))  // If the watchdog is not enabled
 		   {
 			    WDTCSR |= (1<<WDIE);   // Enable watchdog
@@ -234,12 +219,12 @@ void process_limit_pin_change_event()
 		}
 	}
 		
-    //Watch dog timeout interrupt (33 ms), disable watchdog and call pin change event
+  //Watch dog timeout interrupt (33 ms), disable watchdog and call pin change event
 	ISR(WDT_vect) // Watchdog timer ISR
-    {
-      WDTCSR &= ~(1<<WDIE); // Disable watchdog timer. 
+  {
+    WDTCSR &= ~(1<<WDIE); // Disable watchdog timer. 
 	  process_limit_pin_change_event(); //debounced, now process
-    }
+  }
   #endif
 #endif // DEFAULTS_RAMPS_BOARD
 

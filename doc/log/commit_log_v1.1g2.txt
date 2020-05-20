@@ -1,0 +1,7 @@
+----------------
+Date: 2020-05-15
+Author: Huub Buis
+Subject: G33 spindle synchronization support.
+
+- Added debounce filter to index and synchronization pulses ($41)
+- Added G33 support for RAMPS shiels, index pulses on INT0, synchronization pulses on INT2

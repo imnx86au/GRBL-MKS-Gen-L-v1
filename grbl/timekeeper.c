@@ -35,30 +35,29 @@ void debounce_index_pulse() {
 }
 // Debounce the receive of a  Synchronization pulse by delayed checking if the pulse is still active
 void debounce_sync_pulse() {
-  if (settings.debounce_tics==0){							                  // No Synchronization pulse debouncing
-    system_set_threading_exec_flag(EXEC_PLANNER_SYNC_PULSE);	  // Signal the receive of an synchronization pulse
+  if (settings.debounce_tics==0){							               // No Synchronization pulse debouncing
+    system_set_threading_exec_flag(EXEC_PLANNER_SYNC_PULSE); // Signal the receive of an synchronization pulse
   }
   else {
-    OCR5B=(TCNT5+settings.debounce_tics);                       // Setup the debounce delayed trigger, debounce_tics x 4 us
-    bit_true(TIFR5,(1<<OCF5B));							                    // clear any pending OC5B interrupts
-    bit_true(TIMSK5, 1<<OCIE5B);						                    // Enable Output compare B match interrupt
+    OCR5B=(TCNT5+settings.debounce_tics);                    // Setup the debounce delayed trigger, debounce_tics x 4 us
+    bit_true(TIFR5,(1<<OCF5B));							                 // clear any pending OC5B interrupts
+    bit_true(TIMSK5, 1<<OCIE5B);						                 // Enable Output compare B match interrupt
   }
-  coolant_set_state(COOLANT_DISABLE);
 }
 // Initialises Timer 5 for measuring time between pulses.
 // Used for G33 spindle synchronization (threading)
 void timekeeper_init() {
-  TCCR5A =0;						                    // timer outputs disconnected, no waveform generation.
-  bit_true(TCCR5B,(1<<CS51) | (1<<CS50));   // pre-scaler: 1/64 (4 microseconds per tick @ 16MHz)
-  bit_true(TIMSK5, 1<<TOIE5);               // enable overflow interrupt for couning longer periods
+  TCCR5A =0;						                                     // timer outputs disconnected, no waveform generation.
+  bit_true(TCCR5B,(1<<CS51) | (1<<CS50));                    // pre-scaler: 1/64 (4 microseconds per tick @ 16MHz)
+  bit_true(TIMSK5, 1<<TOIE5);                                // enable overflow interrupt for couning longer periods
   timekeeper_reset();
 }
 // reset the timer
 void timekeeper_reset(){
   ATOMIC_BLOCK(ATOMIC_RESTORESTATE){
-    TCNT5=0;					                      // reset the counter
-    overflow_offset = 0;		                // set the offset to zero
-    bit_true(TIFR5,(1<<TOV5));	            // clear any pending interrupts
+    TCNT5=0;					                                       // reset the counter
+    overflow_offset = 0;		                                 // set the offset to zero
+    bit_true(TIFR5,(1<<(TOV5 | OCF5A | OCF5B)));             // clear any pending interrupts (Overflow and compare A,B
   }
 }
 // calculate the timer and overflow tics
